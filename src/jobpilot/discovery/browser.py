@@ -128,7 +128,7 @@ def pause_if_challenge(page: Page, wait_seconds: int = 600) -> None:
     """
     if not _is_challenge(page.url):
         return
-    print(f"\n⚠️  检测到验证/登录页（{page.url}），请人工处理…", flush=True)
+    print(f"\n[!] 检测到验证/登录页（{page.url}），请人工处理…", flush=True)
     if sys.stdin and sys.stdin.isatty():
         try:
             input("处理后按回车继续…")
@@ -140,7 +140,7 @@ def pause_if_challenge(page: Page, wait_seconds: int = 600) -> None:
         time.sleep(5)
         page.wait_for_load_state("domcontentloaded", timeout=10_000)
         if not _is_challenge(page.url):
-            print("✓ 验证页已通过", flush=True)
+            print("OK 验证页已通过", flush=True)
             return
     raise RuntimeError(f"等待人工处理验证页超时（{wait_seconds}s）: {page.url}")
 

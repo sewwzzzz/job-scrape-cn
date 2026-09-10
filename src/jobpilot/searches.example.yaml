@@ -1,0 +1,29 @@
+# 搜索配置：每平台关键词 × 城市
+# jp init 会把它复制到 ~/.jobpilot-cn/searches.yaml，之后改那份即可
+#
+# 说明：
+#   keywords  搜索关键词，逐条 × 逐城市抓取
+#   cities    城市中文名（代码见 discovery/boss.py、discovery/liepin.py 的 CITY_CODES，
+#             未收录的城市用 city_codes: {城市名: 代码} 覆盖）
+#   max_pages 猎聘翻页上限（boss 为滚动采集，忽略该项）
+#   boss_salary 可选，Boss 的 salary 过滤参数（如 "402" 表示 20-30K）
+#   experience  可选，仅 boss 生效的服务端年限筛选，取值只能是：
+#               "1年以下" / "1年以内" / "1-3年" / "3-5年" / "5-10年" / "10年以上"
+#               写别的值会报错。猎聘没有可用的服务端年限参数，配了只会打印提示，
+#               年限筛选请用 ~/.jobpilot-cn/profile.json 的 preferences.experience（本地过滤）
+#   education   可选，服务端学历筛选，两平台可用档位不同：
+#               boss: "高中"/"大专"/"本科"/"硕士"/"博士" → degree=206/202/203/204/205
+#               liepin: "本科"/"硕士"/"大专" → eduLevel=040/030/050（博士档未确认，未内置）
+#               写别的值会报错
+
+boss:
+  keywords: ["算子开发", "GPU 优化", "CUDA"]
+  cities: ["北京", "上海", "深圳"]
+  experience: "3-5年"   # 不需要就删掉这两行（不配 = 不限）
+  education: "本科"
+
+liepin:
+  keywords: ["算子开发", "异构计算"]
+  cities: ["北京", "上海"]
+  max_pages: 3
+  education: "本科"     # 猎聘没有服务端年限参数，但学历参数可用

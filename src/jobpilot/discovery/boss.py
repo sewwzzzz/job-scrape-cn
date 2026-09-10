@@ -11,7 +11,7 @@ import time
 from typing import Any
 from urllib.parse import quote
 
-from .base import BaseDiscoverer
+from .base import BaseDiscoverer, parse_education, parse_experience
 
 BOSS_HOME = "https://www.zhipin.com"
 
@@ -21,6 +21,25 @@ CITY_CODES = {
     "广州": "101280100", "杭州": "101210100", "成都": "101270100",
     "南京": "101190100", "苏州": "101190400", "武汉": "101200100",
     "西安": "101110100", "合肥": "101220100",
+}
+
+# Boss 搜索页 experience 参数（2026-09 逐个实测：103/104/105/106/107 各 15 张卡全中）
+# 猎聘的 workYearCode= URL 参数实测不生效，那边只能靠 profile 的本地年限过滤
+EXPERIENCE_CODES = {
+    "1年以下": "103", "1年以内": "103",
+    "1-3年": "104",
+    "3-5年": "105",
+    "5-10年": "106",
+    "10年以上": "107",
+}
+
+# Boss 搜索页 degree 参数（2026-09 逐档实测，每档 15 张卡全中；201 是混合档不采用）
+DEGREE_CODES = {
+    "高中": "206",
+    "大专": "202",
+    "本科": "203",
+    "硕士": "204",
+    "博士": "205",
 }
 
 # 薪资字体反爬：PUA 私有区字符 → 数字。
@@ -69,6 +88,20 @@ class BossDiscoverer(BaseDiscoverer):
         params = f"query={quote(keyword)}&city={code}"
         if salary := conf.get("boss_salary", ""):
             params += f"&salary={salary}"
+        if exp := conf.get("experience"):
+            exp_code = EXPERIENCE_CODES.get(str(exp).strip())
+            if not exp_code:
+                raise ValueError(
+                    f"boss experience 只支持 {sorted(EXPERIENCE_CODES)}，收到 {exp!r}"
+                )
+            params += f"&experience={exp_code}"
+        if edu := conf.get("education"):
+            edu_code = DEGREE_CODES.get(str(edu).strip())
+            if not edu_code:
+                raise ValueError(
+                    f"boss education 只支持 {sorted(DEGREE_CODES)}，收到 {edu!r}"
+                )
+            params += f"&degree={edu_code}"
         return f"{BOSS_HOME}/web/geek/jobs?{params}"
 
     def run(self, context, keyword: str, conf: dict,
@@ -152,6 +185,10 @@ class BossDiscoverer(BaseDiscoverer):
         parsed = parse_salary(salary_raw)
         tags = [t.strip() for t in
                 card.locator(LOCATORS["tag_list"]).all_text_contents() if t.strip()]
+        # 年限藏在标签里（'3-5年'/'在校/应届'/'经验不限'）；实习卡只有'4天/周'类标签 → 空
+        experience_raw = next((t for t in tags if parse_experience(t)), "")
+        # 学历同样是标签（'本科'/'硕士'/'学历不限'）
+        education_raw = next((t for t in tags if parse_education(t)), "")
 
         location = [p.strip() for p in _text(LOCATORS["company_location"]).split("·")]
         return {
@@ -164,6 +201,8 @@ class BossDiscoverer(BaseDiscoverer):
             "salary_min": parsed[0] if parsed else None,
             "salary_max": parsed[1] if parsed else None,
             "salary_months": parsed[2] if parsed else None,
+            "experience_raw": experience_raw or None,
+            "education_raw": education_raw or None,
             "job_tags": tags and str(tags) or None,  # JSON 数组字符串
             "hr_name": "",   # 列表卡片已不再展示 HR 名/头衔/活跃度
             "hr_title": "",

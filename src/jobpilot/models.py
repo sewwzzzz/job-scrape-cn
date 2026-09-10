@@ -12,31 +12,12 @@ def now_iso() -> str:
     return datetime.now().isoformat(timespec="seconds")
 
 
-# 待抓详情：已发现、未抓、未被过滤
+# 待抓 JD：已发现、未抓、未被过滤
 PENDING_ENRICH = (
     "discovered_at IS NOT NULL AND detail_scraped_at IS NULL AND reject_reason IS NULL"
 )
 
-# 待打分：有 JD 全文、未打分（被过滤的不打分）
-PENDING_SCORE = "full_description IS NOT NULL AND fit_score IS NULL AND reject_reason IS NULL"
-
-
-def pending_greet(min_score: int) -> str:
-    return (
-        f"fit_score >= {int(min_score)} AND greeting IS NULL"
-        " AND reject_reason IS NULL"
-    )
-
-
-def pending_tailor(min_score: int) -> str:
-    return (
-        f"fit_score >= {int(min_score)} AND resume_bullets IS NULL"
-        " AND tailor_failed IS NULL AND reject_reason IS NULL"
-    )
-
-
-# 今日待发：打招呼语已生成、未人工发送、未被过滤
-PENDING_SEND = (
-    "greeting_generated_at IS NOT NULL AND manually_sent_at IS NULL"
-    " AND reject_reason IS NULL"
+# 抓 JD 失败过（可排查后重跑 enrich 再试）
+ENRICH_FAILED = (
+    "detail_scraped_at IS NULL AND enrich_error IS NOT NULL AND reject_reason IS NULL"
 )

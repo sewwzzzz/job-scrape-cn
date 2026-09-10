@@ -9,4 +9,3 @@ build/
 *.sqlite3-wal
 *.sqlite3-shm
 .pytest_cache/
-scripts/_*

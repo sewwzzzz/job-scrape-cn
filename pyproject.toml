@@ -1,16 +1,13 @@
 [project]
 name = "jobpilot-cn"
-version = "0.1.0"
-description = "半自动国内求职 agent：抓岗 → AI 打分 → 打招呼语/简历要点 → 人工发送"
+version = "0.2.0"
+description = "Boss 直聘 / 猎聘 岗位与 JD 全文抓取器：抓岗 → 抓 JD 全文 → 导出 JSON/CSV"
 requires-python = ">=3.11"
 license = { text = "MIT" }
 authors = [{ name = "GriffithLin" }]
 dependencies = [
     "typer>=0.12",
     "rich>=13.7",
-    "openai>=1.40",
-    "anthropic>=0.40",
-    "pydantic>=2.7",
     "pyyaml>=6.0",
     "playwright>=1.45",
 ]

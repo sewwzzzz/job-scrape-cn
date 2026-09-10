@@ -25,6 +25,10 @@ CITY_CODES = {
 # 拦截的 XHR 接口（排除 -cond-init 初始化请求）
 XHR_MARKER = "com.liepin.searchfront4c.pc-search-job"
 
+# 猎聘 eduLevel 参数（2026-09 实测：040→本科、030→硕士、050→大专；
+# 020 与 030 结果相同，博士档无法确认，故未内置）
+EDU_CODES = {"本科": "040", "硕士": "030", "大专": "050"}
+
 LOCATORS = {
     "next_page": "li.ant-pagination-next",
     "page_disabled": "ant-pagination-disabled",
@@ -35,17 +39,39 @@ class LiepinDiscoverer(BaseDiscoverer):
     platform = "liepin"
 
     def build_url(self, keyword: str, city: str, conf: dict) -> str:
+        if conf.get("experience"):
+            # 2026-09 实测：猎聘 URL 上的 workYearCode 不改变结果，别让人白配
+            print("[liepin] 提示：猎聘不支持服务端年限筛选，请改用 profile.json 的 "
+                  "preferences.experience 本地过滤", flush=True)
+        # 2026-09 实测：猎聘真正生效的过滤参数是 dq（地区），city 只影响展示。
+        # 只给 city 时 XHR 请求体里 dq 会落到默认值，结果混杂全国岗位；两者都给才准。
         code = conf.get("city_codes", {}).get(city) or CITY_CODES.get(city, "010")
-        return f"{LIEPIN_HOME}/zhaopin/?key={quote(keyword)}&city={code}"
+        url = f"{LIEPIN_HOME}/zhaopin/?key={quote(keyword)}&city={code}&dq={code}"
+        if edu := conf.get("education"):
+            edu_code = EDU_CODES.get(str(edu).strip())
+            if not edu_code:
+                raise ValueError(
+                    f"liepin education 只支持 {sorted(EDU_CODES)}，收到 {edu!r}"
+                )
+            url += f"&eduLevel={edu_code}"
+        return url
 
     def run(self, context, keyword: str, conf: dict,
             limit: int = 20) -> list[dict[str, Any]]:
         cities = conf.get("cities", ["北京"])
+        # 城市兜底：dq 过滤后仍会混入约 5% 的外地推荐卡，按配置城市再挡一层
+        allowed = {_norm_city(c) for c in cities if _norm_city(c)}
         raw: list[dict[str, Any]] = []
+        skipped = 0
         # 多城平分配额（同 boss.py：避免排前面的城市吃光配额饿死后面城市）
         per_city = limit if len(cities) <= 1 else max(4, limit // len(cities))
         for city in cities:
-            raw.extend(self._scrape_city(context, keyword, city, conf, per_city))
+            jobs, dropped = self._scrape_city(context, keyword, city, conf,
+                                              per_city, allowed)
+            raw.extend(jobs)
+            skipped += dropped
+        if skipped:
+            print(f"[liepin] 跳过 {skipped} 条城市不在配置内的岗位", flush=True)
         # 按 jobId/link 去重（多城市多页可能重复）
         seen: set[str] = set()
         deduped = []
@@ -58,7 +84,9 @@ class LiepinDiscoverer(BaseDiscoverer):
         return self._finalize(deduped, keyword, limit)
 
     def _scrape_city(self, context, keyword: str, city: str, conf: dict,
-                     limit: int) -> list[dict[str, Any]]:
+                     limit: int,
+                     allowed: set[str]) -> tuple[list[dict[str, Any]], int]:
+        """抓单个城市；返回 (岗位列表, 因城市不符丢弃的条数)。"""
         from .browser import pause_if_challenge
 
         captured: list[dict] = []
@@ -97,12 +125,24 @@ class LiepinDiscoverer(BaseDiscoverer):
                 except Exception:
                     break
 
-            return [self._map_card(c, keyword) for c in captured]
+            jobs: list[dict[str, Any]] = []
+            dropped = 0
+            for c in captured:
+                mapped = self._map_card(c, keyword, allowed)
+                if mapped is None:
+                    dropped += 1
+                else:
+                    jobs.append(mapped)
+            return jobs, dropped
         finally:
             page.close()
 
-    def _map_card(self, card: dict, keyword: str) -> dict[str, Any]:
-        """jobCardList 条目 → jobs 表行。字段名以 2026-09 实测为准。"""
+    def _map_card(self, card: dict, keyword: str,
+                  allowed: set[str] | None = None) -> dict[str, Any] | None:
+        """jobCardList 条目 → jobs 表行；城市不在 allowed 内返回 None。
+
+        字段名以 2026-09 实测为准。
+        """
         job = card.get("job") or {}
         comp = card.get("comp") or {}
         rec = card.get("recruiter") or {}
@@ -113,10 +153,18 @@ class LiepinDiscoverer(BaseDiscoverer):
         salary_raw = str(job.get("salary") or "") or None
         parsed = _parse_liepin_salary(salary_raw)
         # dq 形如「上海-浦东新区」（- 分隔，非 ·）
-        dq = str(job.get("dq") or "").split("-")
+        dq_raw = str(job.get("dq") or "")
+        # 城市兜底：dq 为空时无法判定，保留（不误杀）
+        if allowed and _norm_city(dq_raw) and _norm_city(dq_raw) not in allowed:
+            return None
+        dq = dq_raw.split("-")
         tags = [str(t) for t in (job.get("labels") or []) if t]
-        if job.get("requireWorkYears"):
-            tags.append(str(job["requireWorkYears"]))
+        # 猎聘年限在 requireWorkYears：'3-5年' / '经验不限' / '5年以上'
+        experience_raw = str(job.get("requireWorkYears") or "")
+        if experience_raw:
+            tags.append(experience_raw)
+        # 学历在 requireEduLevel：'本科' / '统招本科' / '硕士' / '学历不限'
+        education_raw = str(job.get("requireEduLevel") or "")
         if job.get("requireEduLevel"):
             tags.append(str(job["requireEduLevel"]))
 
@@ -131,12 +179,20 @@ class LiepinDiscoverer(BaseDiscoverer):
             "salary_min": parsed[0] if parsed else None,
             "salary_max": parsed[1] if parsed else None,
             "salary_months": 12,
+            "experience_raw": experience_raw or None,
+            "education_raw": education_raw or None,
             "job_tags": str(tags) or None,
             # 猎聘卡片仍展示 HR 信息（imShowText 如「2月前活跃」）
             "hr_name": rec.get("recruiterName") or "",
             "hr_title": rec.get("recruiterTitle") or "",
             "hr_active": rec.get("imShowText") or "",
         }
+
+
+def _norm_city(name: str) -> str:
+    """城市名归一化，用于比对：「上海-浦东新区」→「上海」、「北京市」→「北京」。"""
+    s = str(name or "").strip().split("-")[0].strip()
+    return s[:-1] if len(s) > 1 and s.endswith("市") else s
 
 
 def _parse_liepin_salary(raw: str) -> tuple[int, int, int] | None:
