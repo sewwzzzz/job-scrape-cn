@@ -7,15 +7,15 @@
 
 ## 当前仓库定位（2026-09-10 起）
 
-jobpilot-cn = **只做数据采集**：抓 Boss 直聘 / 猎聘岗位列表 → 抓 JD 全文 → 导出 JSON/CSV。
+job-scrape-cn = **只做数据采集**：抓 Boss 直聘 / 猎聘岗位列表 → 抓 JD 全文 → 导出 JSON/CSV。
 不含任何 AI 分析、打分、打招呼语、简历定制逻辑，不依赖 LLM API Key。
 
 ## 本次会话的改造（全部 [已完成]）
 
 ### [删除] 剔除 AI 分析与一次性脚本
 
-- `src/jobpilot/llm.py`、`src/jobpilot/scoring/`（score / greet / tailor / validator）
-- `src/jobpilot/prompts/`（3 个 prompt 文本）、`src/jobpilot/report.py`
+- `src/jobscrape/llm.py`、`src/jobscrape/scoring/`（score / greet / tailor / validator）
+- `src/jobscrape/prompts/`（3 个 prompt 文本）、`src/jobscrape/report.py`
 - `scripts/`（build_profile + 4 个猎聘探针/校准脚本）、`examples/`、`tests/test_score_parser.py`、`tests/test_validator.py`
 - `.env.example`、根 `searches.example.yaml`（内容移入包内）
 - 依赖：`openai`、`anthropic`、`pydantic`（未使用）
@@ -24,14 +24,14 @@ jobpilot-cn = **只做数据采集**：抓 Boss 直聘 / 猎聘岗位列表 → 
 
 - `db.py`：表结构精简为 discover / enrich / 过滤三块列，删掉 score、greet、tailor、人工回路列；`counts()` 改为「总岗位 / 已有 JD / 待抓 JD / 抓 JD 失败 / 已过滤」
 - `models.py`：只保留 `PENDING_ENRICH`、`ENRICH_FAILED`、`now_iso()`
-- `config.py`：去掉 `.env` 与 `llm_settings()`、`load_resume()`；新增 `init_profile()` / `init_searches()`；模板随包分发（`src/jobpilot/searches.example.yaml`，用 `PKG_DIR` 定位，安装后仍可用）
+- `config.py`：去掉 `.env` 与 `llm_settings()`、`load_resume()`；新增 `init_profile()` / `init_searches()`；模板随包分发（`src/jobscrape/searches.example.yaml`，用 `PKG_DIR` 定位，安装后仍可用）
 - `pipeline.py`：只编排 discover → enrich；`RunOptions(platforms, max_per_search, do_discover, do_enrich)`
 - `cli.py`：命令收敛为 `init / status / login / discover / enrich / run / export`
 - `__init__.py`、`discovery/base.py`、`ATTRIBUTION.md` 去掉 LLM/防虚构相关表述
 
 ### [新增]
 
-- `src/jobpilot/export.py` + `jp export`：导出 JSON / CSV（含 JD 全文，CSV 带 UTF-8 BOM，默认输出 `~/.jobpilot-cn/exports/`，支持 `--fmt` / `--include-rejected` / `--out-dir`）
+- `src/jobscrape/export.py` + `jp export`：导出 JSON / CSV（含 JD 全文，CSV 带 UTF-8 BOM，默认输出 `~/.job-scrape-cn/exports/`，支持 `--fmt` / `--include-rejected` / `--out-dir`）
 - `tests/test_export.py`、`tests/test_filters.py`
 - README 增加「数据」节的 DBeaver 直连查看说明与常用 SQL
 
@@ -54,7 +54,7 @@ jobpilot-cn = **只做数据采集**：抓 Boss 直聘 / 猎聘岗位列表 → 
 4. **被过滤岗位不会自动翻案**：`PENDING_ENRICH` 要求 `reject_reason IS NULL`，放宽规则后需先 `UPDATE jobs SET reject_reason=NULL` 才会重新抓 JD
 5. **enrich 最多重试 3 次**（`enrich_attempts < 3`），修好选择器后要重跑需先清失败行或清 `enrich_attempts`
 6. Playwright 只在 `discovery/browser.py` 单点封装，选择器集中在各平台模块的 `LOCATORS`
-7. 运行时目录 = `$JOBPILOT_HOME` 或 `~/.jobpilot-cn`（Windows 上即 `C:\Users\<用户>\.jobpilot-cn`，这是设计而非 bug）
+7. 运行时目录 = `$JOBSCRAPE_HOME` 或 `~/.job-scrape-cn`（Windows 上即 `C:\Users\<用户>\.job-scrape-cn`，这是设计而非 bug）
 
 ## 后续迭代
 

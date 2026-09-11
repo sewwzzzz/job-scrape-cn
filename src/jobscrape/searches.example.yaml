@@ -1,5 +1,5 @@
 # 搜索配置：每平台关键词 × 城市
-# jp init 会把它复制到 ~/.jobpilot-cn/searches.yaml，之后改那份即可
+# jp init 会把它复制到 ~/.job-scrape-cn/searches.yaml，之后改那份即可
 #
 # 说明：
 #   keywords  搜索关键词，逐条 × 逐城市抓取
@@ -10,7 +10,7 @@
 #   experience  可选，仅 boss 生效的服务端年限筛选，取值只能是：
 #               "1年以下" / "1年以内" / "1-3年" / "3-5年" / "5-10年" / "10年以上"
 #               写别的值会报错。猎聘没有可用的服务端年限参数，配了只会打印提示，
-#               年限筛选请用 ~/.jobpilot-cn/profile.json 的 preferences.experience（本地过滤）
+#               年限筛选请用 ~/.job-scrape-cn/profile.json 的 preferences.experience（本地过滤）
 #   education   可选，服务端学历筛选，两平台可用档位不同：
 #               boss: "高中"/"大专"/"本科"/"硕士"/"博士" → degree=206/202/203/204/205
 #               liepin: "本科"/"硕士"/"大专" → eduLevel=040/030/050（博士档未确认，未内置）

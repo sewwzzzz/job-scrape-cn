@@ -11,7 +11,7 @@ from rich.table import Table
 
 from . import config, db, export
 
-app = typer.Typer(help="JobPilot-CN：Boss 直聘 / 猎聘 岗位与 JD 全文抓取器")
+app = typer.Typer(help="JobScrape-CN：Boss 直聘 / 猎聘 岗位与 JD 全文抓取器")
 console = Console()
 
 PLATFORMS = ("boss", "liepin")
@@ -27,7 +27,7 @@ def _platforms(platform: str, default_all: bool = True) -> list[str]:
 def init(
     force: bool = typer.Option(False, "--force", help="覆盖已存在的 profile.json / searches.yaml"),
 ) -> None:
-    """初始化 ~/.jobpilot-cn/：数据库 + 配置模板。"""
+    """初始化 ~/.job-scrape-cn/：数据库 + 配置模板。"""
     config.runtime_dir()
     conn = db.connect()
     db.init_db(conn)
@@ -43,7 +43,7 @@ def status() -> None:
     """各阶段计数板。"""
     conn = db.connect()
     db.init_db(conn)
-    table = Table(title="JobPilot 状态")
+    table = Table(title="JobScrape 状态")
     table.add_column("阶段")
     table.add_column("数量", justify="right")
     for k, v in db.counts(conn).items():
@@ -149,7 +149,7 @@ def run_cmd(
 def export_cmd(
     fmt: str = typer.Option("all", help="json / csv / all"),
     include_rejected: bool = typer.Option(False, help="一并导出被过滤的岗位"),
-    out_dir: Optional[Path] = typer.Option(None, help="输出目录，默认 ~/.jobpilot-cn/exports/"),
+    out_dir: Optional[Path] = typer.Option(None, help="输出目录，默认 ~/.job-scrape-cn/exports/"),
 ) -> None:
     """导出已抓岗位（含 JD 全文）为 JSON / CSV。"""
     conn = db.connect()

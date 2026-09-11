@@ -1,6 +1,6 @@
 """纯代码过滤链测试：标题黑名单 / 公司黑名单 / 薪资下限 / 日结岗。"""
 
-from jobpilot.discovery.base import apply_filters
+from jobscrape.discovery.base import apply_filters
 
 PROFILE = {
     "preferences": {

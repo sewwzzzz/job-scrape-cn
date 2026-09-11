@@ -1,6 +1,6 @@
 """薪资解析测试：字体反爬解码 + 正则解析。"""
 
-from jobpilot.discovery.boss import decode_salary_font, parse_salary
+from jobscrape.discovery.boss import decode_salary_font, parse_salary
 
 
 def test_decode_salary_font():
@@ -37,6 +37,6 @@ def test_parse_salary_invalid():
 
 
 def test_liepin_salary():
-    from jobpilot.discovery.liepin import _parse_liepin_salary
+    from jobscrape.discovery.liepin import _parse_liepin_salary
     assert _parse_liepin_salary("25-45K") == (25, 45, 12)
     assert _parse_liepin_salary("面议") is None

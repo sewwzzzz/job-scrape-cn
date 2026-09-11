@@ -11,7 +11,7 @@ import yaml
 
 PKG_DIR = Path(__file__).resolve().parent
 
-# 默认过滤配置模板：jp init 写入 ~/.jobpilot-cn/profile.json 后由使用者编辑。
+# 默认过滤配置模板：jp init 写入 ~/.job-scrape-cn/profile.json 后由使用者编辑。
 # 只有 preferences 生效，规则见 discovery/base.py 的 apply_filters。
 DEFAULT_PROFILE = {
     "preferences": {
@@ -32,7 +32,7 @@ DEFAULT_PROFILE = {
 
 
 def runtime_dir() -> Path:
-    d = Path(os.environ.get("JOBPILOT_HOME", str(Path.home() / ".jobpilot-cn")))
+    d = Path(os.environ.get("JOBSCRAPE_HOME", str(Path.home() / ".job-scrape-cn")))
     d.mkdir(parents=True, exist_ok=True)
     (d / "cookies").mkdir(exist_ok=True)
     (d / "exports").mkdir(exist_ok=True)

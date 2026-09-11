@@ -8,7 +8,7 @@ import json
 
 import pytest
 
-from jobpilot import db, export
+from jobscrape import db, export
 
 
 def _job(url: str, **over) -> dict:
@@ -32,7 +32,7 @@ def _job(url: str, **over) -> dict:
 
 @pytest.fixture()
 def conn(tmp_path, monkeypatch):
-    monkeypatch.setenv("JOBPILOT_HOME", str(tmp_path))
+    monkeypatch.setenv("JOBSCRAPE_HOME", str(tmp_path))
     c = db.connect()
     db.init_db(c)
     db.upsert_job(c, _job("https://www.zhipin.com/job_detail/1.html"))

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from jobpilot.discovery.base import (
+from jobscrape.discovery.base import (
     UNLIMITED_YEARS,
     apply_filters,
     is_unlimited_experience,
@@ -98,7 +98,7 @@ def test_filter_disabled_by_default():
 
 
 def test_boss_search_experience_param():
-    from jobpilot.discovery.boss import BossDiscoverer
+    from jobscrape.discovery.boss import BossDiscoverer
 
     d = BossDiscoverer()
     assert "experience=105" in d.build_url("算子开发", "北京", {"experience": "3-5年"})
@@ -111,7 +111,7 @@ def test_boss_search_experience_param():
 
 
 def test_boss_search_education_param():
-    from jobpilot.discovery.boss import BossDiscoverer
+    from jobscrape.discovery.boss import BossDiscoverer
 
     d = BossDiscoverer()
     assert "degree=203" in d.build_url("算子开发", "北京", {"education": "本科"})

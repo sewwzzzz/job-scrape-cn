@@ -1,0 +1,193 @@
+{
+  "id": "2026-09-11-150924",
+  "generated_at": "2026-09-11T07:09:24.7032357Z",
+  "language": "zh",
+  "pages": [
+    {
+      "slug": "1-xiang-mu-gai-lan-ding-wei-yu-he-xin-jie-zhi",
+      "title": "项目概览：定位与核心价值",
+      "file": "1-xiang-mu-gai-lan-ding-wei-yu-he-xin-jie-zhi.md",
+      "section": "快速上手",
+      "level": "Beginner"
+    },
+    {
+      "slug": "2-kuai-su-kai-shi-cong-an-zhuang-dao-shou-ci-dao-chu",
+      "title": "快速开始：从安装到首次导出",
+      "file": "2-kuai-su-kai-shi-cong-an-zhuang-dao-shou-ci-dao-chu.md",
+      "section": "快速上手",
+      "level": "Beginner"
+    },
+    {
+      "slug": "3-an-zhuang-yu-huan-jing-zhun-bei",
+      "title": "安装与环境准备",
+      "file": "3-an-zhuang-yu-huan-jing-zhun-bei.md",
+      "section": "快速上手",
+      "level": "Beginner"
+    },
+    {
+      "slug": "4-ming-ling-xing-ming-ling-ti-xi",
+      "title": "命令行命令体系",
+      "file": "4-ming-ling-xing-ming-ling-ti-xi.md",
+      "section": "快速上手",
+      "level": "Beginner"
+    },
+    {
+      "slug": "5-sou-suo-ren-wu-pei-zhi-guan-jian-ci-yu-cheng-shi",
+      "title": "搜索任务配置：关键词与城市",
+      "file": "5-sou-suo-ren-wu-pei-zhi-guan-jian-ci-yu-cheng-shi.md",
+      "section": "快速上手",
+      "level": "Intermediate"
+    },
+    {
+      "slug": "6-guo-lu-pian-hao-pei-zhi",
+      "title": "过滤偏好配置",
+      "file": "6-guo-lu-pian-hao-pei-zhi.md",
+      "section": "快速上手",
+      "level": "Intermediate"
+    },
+    {
+      "slug": "7-liang-jie-duan-liu-shui-xian-de-bian-pai-yu-mi-deng-xu-chuan",
+      "title": "两阶段流水线的编排与幂等续传",
+      "file": "7-liang-jie-duan-liu-shui-xian-de-bian-pai-yu-mi-deng-xu-chuan.md",
+      "section": "深入探索",
+      "group": "采集流水线架构",
+      "level": "Intermediate"
+    },
+    {
+      "slug": "8-lie-ji-zhuang-tai-ji-jie-duan-qi-yue-yu-xu-chuan-yu-yi",
+      "title": "列级状态机：阶段契约与续传语义",
+      "file": "8-lie-ji-zhuang-tai-ji-jie-duan-qi-yue-yu-xu-chuan-yu-yi.md",
+      "section": "深入探索",
+      "group": "采集流水线架构",
+      "level": "Advanced"
+    },
+    {
+      "slug": "9-sqlite-dan-biao-shu-ju-zong-xian-yu-qu-zhong-ru-ku",
+      "title": "SQLite 单表数据总线与去重入库",
+      "file": "9-sqlite-dan-biao-shu-ju-zong-xian-yu-qu-zhong-ru-ku.md",
+      "section": "深入探索",
+      "group": "采集流水线架构",
+      "level": "Intermediate"
+    },
+    {
+      "slug": "10-cai-ji-qi-ji-lei-yu-chun-dai-ma-guo-lu-lian",
+      "title": "采集器基类与纯代码过滤链",
+      "file": "10-cai-ji-qi-ji-lei-yu-chun-dai-ma-guo-lu-lian.md",
+      "section": "深入探索",
+      "group": "岗位列表采集",
+      "level": "Intermediate"
+    },
+    {
+      "slug": "11-boss-zhi-pin-cai-ji-gun-dong-jia-zai-yu-xin-zi-zi-ti-fan-pa",
+      "title": "Boss 直聘采集：滚动加载与薪资字体反爬",
+      "file": "11-boss-zhi-pin-cai-ji-gun-dong-jia-zai-yu-xin-zi-zi-ti-fan-pa.md",
+      "section": "深入探索",
+      "group": "岗位列表采集",
+      "level": "Advanced"
+    },
+    {
+      "slug": "12-xi-pin-cai-ji-xhr-lan-jie-yu-fen-ye-fan-ye",
+      "title": "猎聘采集：XHR 拦截与分页翻页",
+      "file": "12-xi-pin-cai-ji-xhr-lan-jie-yu-fen-ye-fan-ye.md",
+      "section": "深入探索",
+      "group": "岗位列表采集",
+      "level": "Advanced"
+    },
+    {
+      "slug": "13-liu-lan-qi-hui-hua-feng-zhuang-yu-deng-lu-tai-chi-jiu-hua",
+      "title": "浏览器会话封装与登录态持久化",
+      "file": "13-liu-lan-qi-hui-hua-feng-zhuang-yu-deng-lu-tai-chi-jiu-hua.md",
+      "section": "深入探索",
+      "group": "浏览器底座与反爬",
+      "level": "Advanced"
+    },
+    {
+      "slug": "14-fan-jian-ce-zhu-ru-yu-yan-zheng-ye-ren-gong-zan-ting",
+      "title": "反检测注入与验证页人工暂停",
+      "file": "14-fan-jian-ce-zhu-ru-yu-yan-zheng-ye-ren-gong-zan-ting.md",
+      "section": "深入探索",
+      "group": "浏览器底座与反爬",
+      "level": "Advanced"
+    },
+    {
+      "slug": "15-nian-xian-guo-lu-jie-xi-yu-zuo-kai-you-bi-qu-jian-pi-pei",
+      "title": "年限过滤：解析与左开右闭区间匹配",
+      "file": "15-nian-xian-guo-lu-jie-xi-yu-zuo-kai-you-bi-qu-jian-pi-pei.md",
+      "section": "深入探索",
+      "group": "过滤规则深度剖析",
+      "level": "Advanced"
+    },
+    {
+      "slug": "16-xue-li-guo-lu-dang-wei-gui-yu-bai-ming-dan",
+      "title": "学历过滤：档位归一与白名单",
+      "file": "16-xue-li-guo-lu-dang-wei-gui-yu-bai-ming-dan.md",
+      "section": "深入探索",
+      "group": "过滤规则深度剖析",
+      "level": "Intermediate"
+    },
+    {
+      "slug": "17-jd-quan-wen-zhua-qu-jie-kou-lan-jie-yu-dom-jiang-ji",
+      "title": "JD 全文抓取：接口拦截与 DOM 降级",
+      "file": "17-jd-quan-wen-zhua-qu-jie-kou-lan-jie-yu-dom-jiang-ji.md",
+      "section": "深入探索",
+      "group": "JD 全文抓取",
+      "level": "Advanced"
+    },
+    {
+      "slug": "18-zhua-qu-shi-bai-zhong-shi-yu-duan-dian-xu-zhua",
+      "title": "抓取失败重试与断点续抓",
+      "file": "18-zhua-qu-shi-bai-zhong-shi-yu-duan-dian-xu-zhua.md",
+      "section": "深入探索",
+      "group": "JD 全文抓取",
+      "level": "Intermediate"
+    },
+    {
+      "slug": "19-dao-chu-wei-json-yu-csv",
+      "title": "导出为 JSON 与 CSV",
+      "file": "19-dao-chu-wei-json-yu-csv.md",
+      "section": "深入探索",
+      "group": "数据导出与查询",
+      "level": "Beginner"
+    },
+    {
+      "slug": "20-shu-ju-zi-dian-yu-shu-ju-ku-zhi-lian-cha-xun",
+      "title": "数据字典与数据库直连查询",
+      "file": "20-shu-ju-zi-dian-yu-shu-ju-ku-zhi-lian-cha-xun.md",
+      "section": "深入探索",
+      "group": "数据导出与查询",
+      "level": "Intermediate"
+    },
+    {
+      "slug": "21-yun-xing-shi-mu-lu-yu-huan-jing-bian-liang",
+      "title": "运行时目录与环境变量",
+      "file": "21-yun-xing-shi-mu-lu-yu-huan-jing-bian-liang.md",
+      "section": "深入探索",
+      "group": "工程与测试",
+      "level": "Beginner"
+    },
+    {
+      "slug": "22-ping-tai-cheng-shi-dai-ma-yu-shai-xuan-can-shu-ying-she",
+      "title": "平台城市代码与筛选参数映射",
+      "file": "22-ping-tai-cheng-shi-dai-ma-yu-shai-xuan-can-shu-ying-she.md",
+      "section": "深入探索",
+      "group": "工程与测试",
+      "level": "Intermediate"
+    },
+    {
+      "slug": "23-dan-yuan-ce-shi-fu-gai-fan-wei",
+      "title": "单元测试覆盖范围",
+      "file": "23-dan-yuan-ce-shi-fu-gai-fan-wei.md",
+      "section": "深入探索",
+      "group": "工程与测试",
+      "level": "Intermediate"
+    },
+    {
+      "slug": "24-she-ji-yue-shu-yu-xiang-mu-yan-jin-mai-luo",
+      "title": "设计约束与项目演进脉络",
+      "file": "24-she-ji-yue-shu-yu-xiang-mu-yan-jin-mai-luo.md",
+      "section": "深入探索",
+      "group": "工程与测试",
+      "level": "Intermediate"
+    }
+  ]
+}

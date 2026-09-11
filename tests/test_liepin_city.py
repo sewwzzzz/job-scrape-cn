@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from jobpilot.discovery.liepin import (
+from jobscrape.discovery.liepin import (
     CITY_CODES,
     LiepinDiscoverer,
     _norm_city,

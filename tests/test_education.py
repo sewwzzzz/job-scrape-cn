@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from jobpilot.discovery.base import EDU_UNLIMITED, apply_filters, parse_education
+from jobscrape.discovery.base import EDU_UNLIMITED, apply_filters, parse_education
 
 # 只接受要求本科 / 硕士的岗位
 PROFILE = {"preferences": {"education": {"allowed": ["本科", "硕士"]}}}
@@ -69,7 +69,7 @@ def test_filter_disabled_by_default():
 
 
 def test_liepin_search_education_param():
-    from jobpilot.discovery.liepin import LiepinDiscoverer
+    from jobscrape.discovery.liepin import LiepinDiscoverer
 
     d = LiepinDiscoverer()
     assert "eduLevel=040" in d.build_url("算子开发", "上海", {"education": "本科"})

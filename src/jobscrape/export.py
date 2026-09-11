@@ -1,6 +1,6 @@
 """导出抓取结果：JSON / CSV（供人工查看或下游分析）。
 
-默认输出到 ~/.jobpilot-cn/exports/，文件名带日期。
+默认输出到 ~/.job-scrape-cn/exports/，文件名带日期。
 """
 
 from __future__ import annotations

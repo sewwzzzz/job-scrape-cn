@@ -1,9 +1,15 @@
-# JobPilot-CN
+# JobScrape-CN
 
 国内招聘平台**岗位与 JD 全文抓取器**：抓岗位列表 → 抓 JD 全文 → 导出 JSON / CSV。
 
 只做数据采集，**不含任何 AI 分析、打分、简历定制逻辑，也不需要任何 LLM API Key**。
 **复用代码**，原作者仓库[job-pilot-cn](https://github.com/GriffithLin/job-pilot-cn)，在此基础上改成自用版本。
+
+## 文档引导
+
+1. 快速开始，可继续往下看
+
+2. 想了解更多或者详细引导，见[wiki](.zread/wiki/versions/2026-09-11-150924/)
 
 ## 能做什么
 
@@ -36,13 +42,13 @@ playwright install chromium
 ## 快速开始
 
 ```powershell
-# 1. 初始化运行时目录 ~/.jobpilot-cn/（数据库 + 配置模板）
+# 1. 初始化运行时目录 ~/.job-scrape-cn/（数据库 + 配置模板）
 jp init
 #    生成两个文件，按需编辑：
-#    ~/.jobpilot-cn/searches.yaml  关键词 × 城市
-#    ~/.jobpilot-cn/profile.json   过滤规则
+#    ~/.job-scrape-cn/searches.yaml  关键词 × 城市
+#    ~/.job-scrape-cn/profile.json   过滤规则
 
-# 2. 扫码登录（登录态保存在 ~/.jobpilot-cn/cookies/，约一周有效）
+# 2. 扫码登录（登录态保存在 ~/.job-scrape-cn/cookies/，约一周有效）
 jp login boss
 jp login liepin
 
@@ -50,11 +56,11 @@ jp login liepin
 jp run --max 20              # 两个平台；--platform boss 只抓 Boss
 
 # 4. 导出
-jp export                    # JSON + CSV 写到 ~/.jobpilot-cn/exports/
+jp export                    # JSON + CSV 写到 ~/.job-scrape-cn/exports/
 jp export --fmt csv --out-dir D:\data
 ```
 
-运行时目录可用环境变量 `JOBPILOT_HOME` 改到别处。
+运行时目录可用环境变量 `JOBSCRAPE_HOME` 改到别处。
 
 ## 命令一览
 
@@ -82,7 +88,7 @@ jp enrich --max 50      # 跑完看 jp status 的「待抓 JD」，不为 0 就�
 
 ## 配置
 
-### `~/.jobpilot-cn/searches.yaml`
+### `~/.job-scrape-cn/searches.yaml`
 
 ```yaml
 boss:
@@ -123,9 +129,9 @@ liepin:
 写其它值会直接报错（不静默失效）。猎聘的 URL **年限**参数实测不改变结果，配了只会打印提示，
 年限筛选请用下面的本地过滤；学历则两平台都可用服务端参数。
 
-内置城市代码见 `src/jobpilot/discovery/boss.py` 与 `.../liepin.py` 的 `CITY_CODES`。
+内置城市代码见 `src/jobscrape/discovery/boss.py` 与 `.../liepin.py` 的 `CITY_CODES`。
 
-### `~/.jobpilot-cn/profile.json`
+### `~/.job-scrape-cn/profile.json`
 
 ```json
 {
@@ -159,7 +165,7 @@ liepin:
 
 ## 数据
 
-SQLite 单表 `jobs`（`~/.jobpilot-cn/db.sqlite3`，WAL 模式），主键为岗位 URL。导出字段：
+SQLite 单表 `jobs`（`~/.job-scrape-cn/db.sqlite3`，WAL 模式），主键为岗位 URL。导出字段：
 
 `platform, job_title, company, city, district, salary_raw, salary_min, salary_max,
 salary_months, experience_raw, education_raw, job_tags, hr_name, hr_title, hr_active,
@@ -174,9 +180,9 @@ Boss 取自卡片标签，猎聘取自 `requireWorkYears` / `requireEduLevel`；
 CSV 为 UTF-8 BOM，Excel 双击直接打开不乱码。
 
 不导出数据也一直在库里（`jp export` 只是快照）。想直接查库，用任意 SQLite 客户端打开
-`~/.jobpilot-cn/db.sqlite3` 即可，例如 DBeaver CE：
+`~/.job-scrape-cn/db.sqlite3` 即可，例如 DBeaver CE：
 
-1. 数据库 → 新建连接 → 选 **SQLite** → Path 选 `~/.jobpilot-cn/db.sqlite3` → 完成
+1. 数据库 → 新建连接 → 选 **SQLite** → Path 选 `~/.job-scrape-cn/db.sqlite3` → 完成
 2. 首次会提示下载 SQLite JDBC 驱动，允许联网下载（离线环境会卡在这一步）
 3. 展开库 → `jobs` 表 → 「数据」页查看
 
@@ -203,7 +209,7 @@ ORDER BY discovered_at DESC LIMIT 50;
 ## 项目结构
 
 ```
-src/jobpilot/
+src/jobscrape/
 ├── cli.py            # Typer 命令行入口
 ├── config.py         # 运行时目录、profile / searches 加载
 ├── db.py             # SQLite 单表 + upsert/查询
