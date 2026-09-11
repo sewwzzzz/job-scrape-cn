@@ -3,8 +3,7 @@
 国内招聘平台**岗位与 JD 全文抓取器**：抓岗位列表 → 抓 JD 全文 → 导出 JSON / CSV。
 
 只做数据采集，**不含任何 AI 分析、打分、简历定制逻辑，也不需要任何 LLM API Key**。
-架构思想与平台抓取经验来自 [ApplyPilot](https://github.com/Pickle-Pixel/applypilot)（海外）与
-[get_jobs](https://github.com/loks666/get_jobs)（国内平台），均**未复用代码**，见 [ATTRIBUTION.md](ATTRIBUTION.md)。
+**复用代码**，原作者仓库[job-pilot-cn](https://github.com/GriffithLin/job-pilot-cn)，在此基础上改成自用版本。
 
 ## 能做什么
 
