@@ -1,0 +1,163 @@
+{
+  "id": "2026-09-11-132154",
+  "generated_at": "2026-09-11T05:21:54.051216Z",
+  "language": "zh",
+  "pages": [
+    {
+      "slug": "1-xiang-mu-gai-shu",
+      "title": "项目概述",
+      "file": "1-xiang-mu-gai-shu.md",
+      "section": "Get Started",
+      "level": "Beginner"
+    },
+    {
+      "slug": "2-kuai-su-kai-shi",
+      "title": "快速开始",
+      "file": "2-kuai-su-kai-shi.md",
+      "section": "Get Started",
+      "level": "Beginner"
+    },
+    {
+      "slug": "3-ming-ling-xing-ming-ling-quan-lan",
+      "title": "命令行命令全览",
+      "file": "3-ming-ling-xing-ming-ling-quan-lan.md",
+      "section": "Get Started",
+      "level": "Beginner"
+    },
+    {
+      "slug": "4-yun-xing-shi-mu-lu-yu-pei-zhi-ti-xi",
+      "title": "运行时目录与配置体系",
+      "file": "4-yun-xing-shi-mu-lu-yu-pei-zhi-ti-xi.md",
+      "section": "Get Started",
+      "level": "Beginner"
+    },
+    {
+      "slug": "5-lie-ji-zhuang-tai-ji-yu-mi-deng-xu-chuan-ji-zhi",
+      "title": "列级状态机与幂等续传机制",
+      "file": "5-lie-ji-zhuang-tai-ji-yu-mi-deng-xu-chuan-ji-zhi.md",
+      "section": "Deep Dive",
+      "group": "架构与数据流",
+      "level": "Advanced"
+    },
+    {
+      "slug": "6-sqlite-dan-biao-shu-ju-zong-xian-yu-biao-jie-gou",
+      "title": "SQLite 单表数据总线与表结构",
+      "file": "6-sqlite-dan-biao-shu-ju-zong-xian-yu-biao-jie-gou.md",
+      "section": "Deep Dive",
+      "group": "架构与数据流",
+      "level": "Intermediate"
+    },
+    {
+      "slug": "7-mo-kuai-bian-jie-yu-jie-duan-bian-pai-qi-yue",
+      "title": "模块边界与阶段编排契约",
+      "file": "7-mo-kuai-bian-jie-yu-jie-duan-bian-pai-qi-yue.md",
+      "section": "Deep Dive",
+      "group": "架构与数据流",
+      "level": "Intermediate"
+    },
+    {
+      "slug": "8-playwright-liu-lan-qi-dan-dian-feng-zhuang-yu-fan-jian-ce",
+      "title": "Playwright 浏览器单点封装与反检测",
+      "file": "8-playwright-liu-lan-qi-dan-dian-feng-zhuang-yu-fan-jian-ce.md",
+      "section": "Deep Dive",
+      "group": "平台采集实现",
+      "level": "Advanced"
+    },
+    {
+      "slug": "9-boss-zhi-pin-lie-biao-cai-ji-yu-xin-zi-zi-ti-fan-pa",
+      "title": "Boss 直聘列表采集与薪资字体反爬",
+      "file": "9-boss-zhi-pin-lie-biao-cai-ji-yu-xin-zi-zi-ti-fan-pa.md",
+      "section": "Deep Dive",
+      "group": "平台采集实现",
+      "level": "Intermediate"
+    },
+    {
+      "slug": "10-xi-pin-xhr-lan-jie-yu-cheng-shi-jiu-pian",
+      "title": "猎聘 XHR 拦截与城市纠偏",
+      "file": "10-xi-pin-xhr-lan-jie-yu-cheng-shi-jiu-pian.md",
+      "section": "Deep Dive",
+      "group": "平台采集实现",
+      "level": "Intermediate"
+    },
+    {
+      "slug": "11-jd-quan-wen-zhua-qu-yu-jie-kou-you-xian-dom-jiang-ji",
+      "title": "JD 全文抓取与接口优先/DOM 降级",
+      "file": "11-jd-quan-wen-zhua-qu-yu-jie-kou-you-xian-dom-jiang-ji.md",
+      "section": "Deep Dive",
+      "group": "平台采集实现",
+      "level": "Intermediate"
+    },
+    {
+      "slug": "12-chun-dai-ma-guo-lu-lian-she-ji",
+      "title": "纯代码过滤链设计",
+      "file": "12-chun-dai-ma-guo-lu-lian-she-ji.md",
+      "section": "Deep Dive",
+      "group": "过滤与筛选规则",
+      "level": "Intermediate"
+    },
+    {
+      "slug": "13-nian-xian-jie-xi-yu-zuo-kai-you-bi-qu-jian-guo-lu",
+      "title": "年限解析与左开右闭区间过滤",
+      "file": "13-nian-xian-jie-xi-yu-zuo-kai-you-bi-qu-jian-guo-lu.md",
+      "section": "Deep Dive",
+      "group": "过滤与筛选规则",
+      "level": "Advanced"
+    },
+    {
+      "slug": "14-xue-li-dang-wei-gui-hua-guo-lu",
+      "title": "学历档位归一化过滤",
+      "file": "14-xue-li-dang-wei-gui-hua-guo-lu.md",
+      "section": "Deep Dive",
+      "group": "过滤与筛选规则",
+      "level": "Intermediate"
+    },
+    {
+      "slug": "15-fu-wu-duan-shai-xuan-can-shu-nian-xian-xue-li-xin-zi",
+      "title": "服务端筛选参数（年限/学历/薪资）",
+      "file": "15-fu-wu-duan-shai-xuan-can-shu-nian-xian-xue-li-xin-zi.md",
+      "section": "Deep Dive",
+      "group": "搜索配置与服务端参数",
+      "level": "Intermediate"
+    },
+    {
+      "slug": "16-cheng-shi-dai-ma-ying-she-yu-duo-cheng-pei-e-fen-pei",
+      "title": "城市代码映射与多城配额分配",
+      "file": "16-cheng-shi-dai-ma-ying-she-yu-duo-cheng-pei-e-fen-pei.md",
+      "section": "Deep Dive",
+      "group": "搜索配置与服务端参数",
+      "level": "Intermediate"
+    },
+    {
+      "slug": "17-deng-lu-tai-chi-jiu-hua-yu-sessionstorage-hui-guan",
+      "title": "登录态持久化与 sessionStorage 回灌",
+      "file": "17-deng-lu-tai-chi-jiu-hua-yu-sessionstorage-hui-guan.md",
+      "section": "Deep Dive",
+      "group": "登录态、稳定性与运维",
+      "level": "Intermediate"
+    },
+    {
+      "slug": "18-hua-kuai-yan-zheng-ye-ren-gong-zan-ting-ji-zhi",
+      "title": "滑块/验证页人工暂停机制",
+      "file": "18-hua-kuai-yan-zheng-ye-ren-gong-zan-ting-ji-zhi.md",
+      "section": "Deep Dive",
+      "group": "登录态、稳定性与运维",
+      "level": "Intermediate"
+    },
+    {
+      "slug": "19-shu-ju-dao-chu-json-csv",
+      "title": "数据导出（JSON / CSV）",
+      "file": "19-shu-ju-dao-chu-json-csv.md",
+      "section": "Deep Dive",
+      "group": "登录态、稳定性与运维",
+      "level": "Beginner"
+    },
+    {
+      "slug": "20-gu-zhang-pai-cha-yu-zi-dong-hua-ce-shi",
+      "title": "故障排查与自动化测试",
+      "file": "20-gu-zhang-pai-cha-yu-zi-dong-hua-ce-shi.md",
+      "section": "Deep Dive",
+      "group": "登录态、稳定性与运维",
+      "level": "Intermediate"
+    }
+  ]
+}
