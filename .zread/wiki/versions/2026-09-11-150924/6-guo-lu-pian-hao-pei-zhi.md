@@ -14,7 +14,7 @@ flowchart LR
 
 服务端查找条件必须由各平台自己支持，因此存在平台差异：Boss 支持服务端年限与学历参数，而猎聘只有学历参数真正生效——它的 URL 年限参数实测不改变结果，配了只会打印一行提示，年限筛选必须落到本地。正因为服务端参数不齐整，`profile.json` 的本地过滤才是两平台通用、且语义完全一致的那一层。
 
-Sources: [searches.example.yaml](src/jobscrape/searches.example.yaml#L10-L17), [boss.py](src/jobscrape/discovery/boss.py#L86-L105), [liepin.py](src/jobscrape/discovery/liepin.py#L41-L57)
+Sources: [searches.example.yaml](../../../../src/jobscrape/searches.example.yaml#L10-L17), [boss.py](../../../../src/jobscrape/discovery/boss.py#L86-L105), [liepin.py](../../../../src/jobscrape/discovery/liepin.py#L41-L57)
 
 ## profile.json 的结构与默认模板
 
@@ -32,7 +32,7 @@ Sources: [searches.example.yaml](src/jobscrape/searches.example.yaml#L10-L17), [
 
 `experience` 与 `education` 是嵌套对象，各自还带一个 `allow_unlimited` 开关（默认 `true`），用于决定是否连「经验不限」「学历不限」的岗位也一并淘汰。两类字段值为 `null` 表示**该维度不做任何过滤**。
 
-Sources: [config.py](src/jobscrape/config.py#L14-L31), [config.py](src/jobscrape/config.py#L34-L85), [cli.py](src/jobscrape/cli.py#L26-L38)
+Sources: [config.py](../../../../src/jobscrape/config.py#L14-L31), [config.py](../../../../src/jobscrape/config.py#L34-L85), [cli.py](../../../../src/jobscrape/cli.py#L26-L38)
 
 ## 过滤链的执行顺序
 
@@ -59,13 +59,13 @@ flowchart TD
 
 其中前三条中有一部分是**硬编码规则**、不来自 `profile.json`：`salary_raw` 含「元/天」判为日结岗；`hr_active` 含「月前活跃」或「年前活跃」判为 HR 不活跃。（Boss 的列表卡片已不再展示 HR 活跃度，其 `hr_active` 恒为空串，故 HR 不活跃规则实际只对猎聘生效。）每条规则都带前缀化的原因，如 `title_blacklist:外包`、`daily_wage:日结岗`、`salary_below:18K < 25K`，方便回溯。
 
-Sources: [base.py](src/jobscrape/discovery/base.py#L89-L155), [boss.py](src/jobscrape/discovery/boss.py#L207-L209), [test_filters.py](tests/test_filters.py#L21-L39)
+Sources: [base.py](../../../../src/jobscrape/discovery/base.py#L89-L155), [boss.py](../../../../src/jobscrape/discovery/boss.py#L207-L209), [test_filters.py](../../../../tests/test_filters.py#L21-L39)
 
 ## 薪资下限的折算语义
 
 `salary_min_k` 不直接比较原始薪资，而是先把岗位的薪资区间折算成**按 12 个月计的中位数**再比较。具体公式为 `(salary_min + salary_max) / 2 * salary_months / 12`，其中 `salary_months` 缺省为 12。这一折算让「15 薪」这类岗位的年包被拉平成可比的月度口径，避免因为发薪月数不同而误判。仅当岗位的 `salary_min` 与 `salary_max` 都已解析出、且配置了非空的 `salary_min_k` 时才执行该规则（`salary_min_k` 为 `null` 视为不过滤）。
 
-Sources: [base.py](src/jobscrape/discovery/base.py#L113-L119), [test_filters.py](tests/test_filters.py#L30-L34)
+Sources: [base.py](../../../../src/jobscrape/discovery/base.py#L113-L119), [test_filters.py](../../../../tests/test_filters.py#L30-L34)
 
 ## 年限过滤：左开右闭区间求交
 
@@ -83,7 +83,7 @@ Sources: [base.py](src/jobscrape/discovery/base.py#L113-L119), [test_filters.py]
 
 「经验不限」被解析为 `(0, 99)`，它和任何区间都有交集，因此不能靠求交淘汰，只能由 `experience.allow_unlimited` 单独判断：设为 `false` 时才淘汰不限年限的岗位（默认 `true` 保留）。该规则的完整解析与区间匹配细节另见 [年限过滤：解析与左开右闭区间匹配](15-nian-xian-guo-lu-jie-xi-yu-zuo-kai-you-bi-qu-jian-pi-pei)。
 
-Sources: [base.py](src/jobscrape/discovery/base.py#L16-L22), [base.py](src/jobscrape/discovery/base.py#L25-L49), [base.py](src/jobscrape/discovery/base.py#L76-L86), [base.py](src/jobscrape/discovery/base.py#L121-L137), [test_experience.py](tests/test_experience.py#L61-L91)
+Sources: [base.py](../../../../src/jobscrape/discovery/base.py#L16-L22), [base.py](../../../../src/jobscrape/discovery/base.py#L25-L49), [base.py](../../../../src/jobscrape/discovery/base.py#L76-L86), [base.py](../../../../src/jobscrape/discovery/base.py#L121-L137), [test_experience.py](../../../../tests/test_experience.py#L61-L91)
 
 ## 学历过滤：档位归一与白名单
 
@@ -91,7 +91,7 @@ Sources: [base.py](src/jobscrape/discovery/base.py#L16-L22), [base.py](src/jobsc
 
 几个边界行为值得注意：`allowed` 为空数组时视为**未启用**该过滤，任何学历都通过；「学历不限」默认保留，只有 `education.allow_unlimited` 设为 `false` 时才淘汰。学历档位归一逻辑的完整说明见 [学历过滤：档位归一与白名单](16-xue-li-guo-lu-dang-wei-gui-yu-bai-ming-dan)。
 
-Sources: [base.py](src/jobscrape/discovery/base.py#L52-L73), [base.py](src/jobscrape/discovery/base.py#L139-L153), [test_education.py](tests/test_education.py#L41-L68)
+Sources: [base.py](../../../../src/jobscrape/discovery/base.py#L52-L73), [base.py](../../../../src/jobscrape/discovery/base.py#L139-L153), [test_education.py](../../../../tests/test_education.py#L41-L68)
 
 ## 服务端查找条件与本地过滤的对照
 
@@ -106,7 +106,7 @@ Sources: [base.py](src/jobscrape/discovery/base.py#L52-L73), [base.py](src/jobsc
 
 一个实践约定是：**年限筛选优先用本地过滤**。因为猎聘没有可用的服务端年限参数，若只依赖服务端参数会导致两平台口径不一致；把它统一放到 `profile.json` 才能保证「同一套偏好、两平台同判」。服务端参数到平台代码（如 `degree=203`、`eduLevel=040`）的逐项映射与实测记录，见 [平台城市代码与筛选参数映射](22-ping-tai-cheng-shi-dai-ma-yu-shai-xuan-can-shu-ying-she)。
 
-Sources: [searches.example.yaml](src/jobscrape/searches.example.yaml#L4-L17), [boss.py](src/jobscrape/discovery/boss.py#L26-L43), [liepin.py](src/jobscrape/discovery/liepin.py#L28-L30), [README.md](README.md#L101-L124)
+Sources: [searches.example.yaml](../../../../src/jobscrape/searches.example.yaml#L4-L17), [boss.py](../../../../src/jobscrape/discovery/boss.py#L26-L43), [liepin.py](../../../../src/jobscrape/discovery/liepin.py#L28-L30), [README.md](../../../../README.md#L101-L124)
 
 ## 采集端如何调用过滤链
 
@@ -122,7 +122,7 @@ flowchart LR
 
 由于过滤结果直接落库，采集平台在流水线中的角色是「只写 discover 列」——`reject_reason` / `rejected_at` 属于过滤列，与 JD 抓取阶段互不干扰。整条流水线的阶段衔接与续传语义见 [两阶段流水线的编排与幂等续传](7-liang-jie-duan-liu-shui-xian-de-bian-pai-yu-mi-deng-xu-chuan)。
 
-Sources: [base.py](src/jobscrape/discovery/base.py#L165-L181), [db.py](src/jobscrape/db.py#L44-L47), [pipeline.py](src/jobscrape/pipeline.py#L58-L70)
+Sources: [base.py](../../../../src/jobscrape/discovery/base.py#L165-L181), [db.py](../../../../src/jobscrape/db.py#L44-L47), [pipeline.py](../../../../src/jobscrape/pipeline.py#L58-L70)
 
 ## 被拒岗位的落库、统计与导出
 
@@ -139,7 +139,7 @@ Sources: [base.py](src/jobscrape/discovery/base.py#L165-L181), [db.py](src/jobsc
 
 配置偏好修改后无需额外注册：由于 `apply_filters` 在每次采集时动态读取 `profile.json`，新规则会在下一次采集时自动生效（已入库的历史行不会被回溯重判），若想用新偏好复查旧岗位，需要重抓或查阅上面的导出/查询出口。导出的字段与数据字典详见 [导出为 JSON 与 CSV](19-dao-chu-wei-json-yu-csv)。
 
-Sources: [export.py](src/jobscrape/export.py#L17-L33), [export.py](src/jobscrape/export.py#L48-L69), [db.py](src/jobscrape/db.py#L119-L134), [models.py](src/jobscrape/models.py#L15-L23), [cli.py](src/jobscrape/cli.py#L148-L167)
+Sources: [export.py](../../../../src/jobscrape/export.py#L17-L33), [export.py](../../../../src/jobscrape/export.py#L48-L69), [db.py](../../../../src/jobscrape/db.py#L119-L134), [models.py](../../../../src/jobscrape/models.py#L15-L23), [cli.py](../../../../src/jobscrape/cli.py#L148-L167)
 
 ## 生成本地过滤配置的流程
 
@@ -158,7 +158,7 @@ flowchart TD
 
 需要强调的是「配置即数据」的设计取舍：过滤偏好不参与阶段状态机、不被写进数据库，它只在采集时被读取一次。这带来轻量与可审计的好处，代价是**偏好变更不回溯历史数据**——这是使用者在调整过滤规则时需要预期的行为边界。
 
-Sources: [config.py](src/jobscrape/config.py#L62-L85), [base.py](src/jobscrape/discovery/base.py#L165-L181), [cli.py](src/jobscrape/cli.py#L26-L38)
+Sources: [config.py](../../../../src/jobscrape/config.py#L62-L85), [base.py](../../../../src/jobscrape/discovery/base.py#L165-L181), [cli.py](../../../../src/jobscrape/cli.py#L26-L38)
 
 ## 下一步
 

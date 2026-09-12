@@ -1,6 +1,6 @@
 本页聚焦 `jobscrape` 数据层的中枢——**单表 `jobs`**。它不是各阶段私有的持久化终点，而是一条**数据总线（data bus）**：discover 与 enrich 两个阶段彼此不直接调用，全部通过读写这一张表的列来交接工作。围绕这张表，本页将解释三件事：列如何分区承载状态、URL 主键如何驱动去重入库、以及 WAL 连接与列白名单/迁移如何保证并发安全与 schema 演进。关于列级状态机的语义契约，另见 [列级状态机：阶段契约与续传语义](8-lie-ji-zhuang-tai-ji-jie-duan-qi-yue-yu-xu-chuan-yu-yi)；关于流水线编排，见 [两阶段流水线的编排与幂等续传](7-liang-jie-duan-liu-shui-xian-de-bian-pai-yu-mi-deng-xu-chuan)。
 
-Sources: [db.py](src/jobscrape/db.py#L1-L5)
+Sources: [db.py](../../../../src/jobscrape/db.py#L1-L5)
 
 ## 设计哲学：一列即一个阶段的状态
 
@@ -31,7 +31,7 @@ flowchart LR
 
 需要说明一处实现细节：按列归属，"过滤结论"也是由 discovery 侧写入的——`_finalize` 在入库前就对每个 job 调用 `apply_filters`，命中规则时把 `reject_reason` 与 `rejected_at` 写进 job 字典，随后一并入库。因此 discovery 实际写入的是"discover 列 + reject 列"，enrichment 只负责 enrich 列。
 
-Sources: [db.py](src/jobscrape/db.py#L1-L5), [discovery/base.py](src/jobscrape/discovery/base.py#L165-L181)
+Sources: [db.py](../../../../src/jobscrape/db.py#L1-L5), [discovery/base.py](../../../../src/jobscrape/discovery/base.py#L165-L181)
 
 ## `jobs` 表结构：三段式列分区
 
@@ -47,7 +47,7 @@ Sources: [db.py](src/jobscrape/db.py#L1-L5), [discovery/base.py](src/jobscrape/d
 
 除表本身外，`SCHEMA` 还声明了一个**部分索引** `idx_jobs_pending_enrich`：它以 `discovered_at` 为索引键，但只覆盖 `detail_scraped_at IS NULL` 的行。这是一个"待办队列"式索引——因为 enrich 阶段每轮只是反复扫描"尚未抓取 JD"的行，把索引裁剪到这批行上，能让索引体积随已完成行数增长而保持精简。
 
-Sources: [db.py](src/jobscrape/db.py#L14-L51)
+Sources: [db.py](../../../../src/jobscrape/db.py#L14-L51)
 
 ## 去重入库：URL 主键归一与 upsert 语义
 
@@ -75,7 +75,7 @@ flowchart TD
 
 值得注意的是，`upsert_job` 是**纯粹的插入式 upsert**：遇到主键冲突时直接 `return False`，**不更新任何已有列**。这一取舍是有意为之——若冲突时覆盖写入，重复采集就会把该行已经抓好的 enrich 列（`full_description`、`detail_scraped_at`）清回 NULL，破坏续传状态。因此更新已存在行只能走另一条受控路径 `update_columns`（enrich 阶段专用），两条写通道职责分明。
 
-Sources: [db.py](src/jobscrape/db.py#L86-L99), [discovery/boss.py](src/jobscrape/discovery/boss.py#L171-L178), [discovery/liepin.py](src/jobscrape/discovery/liepin.py#L75-L84), [discovery/liepin.py](src/jobscrape/discovery/liepin.py#L171-L172)
+Sources: [db.py](../../../../src/jobscrape/db.py#L86-L99), [discovery/boss.py](../../../../src/jobscrape/discovery/boss.py#L171-L178), [discovery/liepin.py](../../../../src/jobscrape/discovery/liepin.py#L75-L84), [discovery/liepin.py](../../../../src/jobscrape/discovery/liepin.py#L171-L172)
 
 ## 两条写通道：`upsert_job` 与 `update_columns`
 
@@ -95,7 +95,7 @@ Sources: [db.py](src/jobscrape/db.py#L86-L99), [discovery/boss.py](src/jobscrape
 
 在 enrichment 阶段，`enrich_jobs` 每次通过 `update_columns` 一次性写回多个 enrich 列：成功时写 `full_description`、`apply_url`、`detail_scraped_at` 并把 `enrich_attempts` 自增；失败时写 `enrich_error` 并同样累加重试次数。整块更新发生在单条 `UPDATE` 中，保证行的状态切换是原子的。
 
-Sources: [db.py](src/jobscrape/db.py#L86-L116), [enrichment/detail.py](src/jobscrape/enrichment/detail.py#L46-L71)
+Sources: [db.py](../../../../src/jobscrape/db.py#L86-L116), [enrichment/detail.py](../../../../src/jobscrape/enrichment/detail.py#L46-L71)
 
 ## 连接与并发：WAL 与 busy_timeout
 
@@ -105,7 +105,7 @@ WAL（Write-Ahead Logging）模式的价值在于**读写并发**：它允许一
 
 `busy_timeout=10000`（10 秒）与之配套：当数据库被其他连接短暂占用时，SQLite 会重试等待而非立即报错，进一步降低并发写入下的失败率。
 
-Sources: [db.py](src/jobscrape/db.py#L65-L70), [config.py](src/jobscrape/config.py#L42-L43), [README.md](README.md#L185-L188)
+Sources: [db.py](../../../../src/jobscrape/db.py#L65-L70), [config.py](../../../../src/jobscrape/config.py#L42-L43), [README.md](../../../../README.md#L185-L188)
 
 ## 列白名单与增量迁移：schema 演进的安全网
 
@@ -117,7 +117,7 @@ Sources: [db.py](src/jobscrape/db.py#L65-L70), [config.py](src/jobscrape/config.
 
 `init_db` 被 `pipeline.run_pipeline`、`cli.init`、`cli.status` 与 `cli.export` 反复调用，正是依赖这份幂等性——无论数据库是新是旧，都能被拉到与当前代码一致的结构。
 
-Sources: [db.py](src/jobscrape/db.py#L53-L62), [db.py](src/jobscrape/db.py#L73-L83), [pipeline.py](src/jobscrape/pipeline.py#L27-L29), [cli.py](src/jobscrape/cli.py#L30-L34)
+Sources: [db.py](../../../../src/jobscrape/db.py#L53-L62), [db.py](../../../../src/jobscrape/db.py#L73-L83), [pipeline.py](../../../../src/jobscrape/pipeline.py#L27-L29), [cli.py](../../../../src/jobscrape/cli.py#L30-L34)
 
 ## 查询与谓词复用：从 `fetch` 到计数板
 
@@ -149,7 +149,7 @@ flowchart LR
 
 每个条件本质都是对某一列**是否为 NULL** 的判断，再次印证了总线设计的内核：**列即状态**，状态即谓词。
 
-Sources: [db.py](src/jobscrape/db.py#L102-L134), [models.py](src/jobscrape/models.py#L15-L23), [enrichment/detail.py](src/jobscrape/enrichment/detail.py#L38-L43), [cli.py](src/jobscrape/cli.py#L41-L52)
+Sources: [db.py](../../../../src/jobscrape/db.py#L102-L134), [models.py](../../../../src/jobscrape/models.py#L15-L23), [enrichment/detail.py](../../../../src/jobscrape/enrichment/detail.py#L38-L43), [cli.py](../../../../src/jobscrape/cli.py#L41-L52)
 
 ## 小结与延伸阅读
 

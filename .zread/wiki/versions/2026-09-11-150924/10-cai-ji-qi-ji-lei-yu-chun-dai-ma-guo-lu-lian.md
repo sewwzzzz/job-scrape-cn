@@ -1,6 +1,6 @@
 `BaseDiscoverer` 与 `apply_filters` 是岗位列表采集阶段的骨架：子类（Boss / 猎聘）只需负责“把列表页的原始卡片抽成字典”，而字段补齐、去噪淘汰、淘汰原因标注这三件事全部收敛到一处共享的**纯代码过滤链**。本页聚焦这条链的**编排结构**与**基类契约**——它不调用任何模型、规则完全可审计，且被淘汰的岗位会被**保留而非丢弃**（供报告尾翻案）。关于年限、学历两步各自的解析算法，另见 [年限过滤：解析与左开右闭区间匹配](15-nian-xian-guo-lu-jie-xi-yu-zuo-kai-you-bi-qu-jian-pi-pei) 与 [学历过滤：档位归一与白名单](16-xue-li-guo-lu-dang-wei-gui-yu-bai-ming-dan)。
 
-Sources: [base.py](src/jobscrape/discovery/base.py#L1-L9)
+Sources: [base.py](../../../../src/jobscrape/discovery/base.py#L1-L9)
 
 ## 设计原则：可审计的纯代码过滤
 
@@ -20,7 +20,7 @@ DEFAULT_PROFILE = {
 
 每条规则一旦命中，都会生成一个**人类可读的淘汰原因字符串**（如 `salary_below:22K < 25K`），并连同时间戳写入 `reject_reason` / `rejected_at` 两列。这一“保留被拒岗”的选择有明确目的：被过滤不等于被删除，它们仍会入库，只是不进入后续的 JD 全文抓取阶段，从而在报告尾部保留翻案余地。关于淘汰列如何参与阶段状态机与计数板，见 [列级状态机：阶段契约与续传语义](8-lie-ji-zhuang-tai-ji-jie-duan-qi-yue-yu-xu-chuan-yu-yi)。
 
-Sources: [base.py](src/jobscrape/discovery/base.py#L1-L1), [config.py](src/jobscrape/config.py#L14-L31), [db.py](src/jobscrape/db.py#L44-L47)
+Sources: [base.py](../../../../src/jobscrape/discovery/base.py#L1-L1), [config.py](../../../../src/jobscrape/config.py#L14-L31), [db.py](../../../../src/jobscrape/db.py#L44-L47)
 
 ## BaseDiscoverer：两个方法的契约
 
@@ -59,7 +59,7 @@ classDiagram
 
 `run` 在基类中直接 `raise NotImplementedError`，强制子类提供平台特定的抓取实现；这也是子类之间唯一真正分化之处。子类按“先收集候选、再交给基类收尾”的模式工作，从而保证两平台的过滤语义完全一致。
 
-Sources: [base.py](src/jobscrape/discovery/base.py#L158-L163), [boss.py](src/jobscrape/discovery/boss.py#L83-L116), [liepin.py](src/jobscrape/discovery/liepin.py#L38-L84)
+Sources: [base.py](../../../../src/jobscrape/discovery/base.py#L158-L163), [boss.py](../../../../src/jobscrape/discovery/boss.py#L83-L116), [liepin.py](../../../../src/jobscrape/discovery/liepin.py#L38-L84)
 
 ## _finalize：过滤链入口与公共字段补齐
 
@@ -85,7 +85,7 @@ flowchart TD
     H -->|否| I[返回全部岗位 含被拒]
 ```
 
-Sources: [base.py](src/jobscrape/discovery/base.py#L165-L181)
+Sources: [base.py](../../../../src/jobscrape/discovery/base.py#L165-L181)
 
 ## 七级过滤链：apply_filters 的顺序与淘汰语义
 
@@ -122,7 +122,7 @@ flowchart TD
 
 其中薪资下限的判定口径为 **`median = (salary_min + salary_max) / 2 * months / 12`**，`months` 缺省按 12 处理——即把年终奖（如 `16薪`）折算进月均，再与 `salary_min_k` 比较。标题黑名单用正则、公司黑名单用子串包含（均做了大小写归一），两者语义不同：前者灵活可写复杂模式，后者只做简单命中。
 
-Sources: [base.py](src/jobscrape/discovery/base.py#L89-L155), [config.py](src/jobscrape/config.py#L16-L31)
+Sources: [base.py](../../../../src/jobscrape/discovery/base.py#L89-L155), [config.py](../../../../src/jobscrape/config.py#L16-L31)
 
 ## 年限与学历两步：区间求交与白名单
 
@@ -132,7 +132,7 @@ Sources: [base.py](src/jobscrape/discovery/base.py#L89-L155), [config.py](src/jo
 
 `apply_filters` 通过 `is_unlimited_experience(raw)` 单独识别“不限”岗位，因为解析出的 `(0, 99)` 会与任何可接受区间都有交集，无法用求交逻辑区分“真不限”与“恰好重叠”。关于年限正则的完整覆盖（`3-5年` / `5年以上` / `1年以内` / `在校/应届`）与**左开右闭区间匹配**的数学推导，见 [年限过滤：解析与左开右闭区间匹配](15-nian-xian-guo-lu-jie-xi-yu-zuo-kai-you-bi-qu-jian-pi-pei)；关于学历档位归一（`统招本科`→`本科`、`本科及以上`→`本科`）与白名单比对，见 [学历过滤：档位归一与白名单](16-xue-li-guo-lu-dang-wei-gui-yu-bai-ming-dan)。
 
-Sources: [base.py](src/jobscrape/discovery/base.py#L48-L49), [base.py](src/jobscrape/discovery/base.py#L121-L153)
+Sources: [base.py](../../../../src/jobscrape/discovery/base.py#L48-L49), [base.py](../../../../src/jobscrape/discovery/base.py#L121-L153)
 
 ## 子类的接入方式：共享 _finalize，各自准备候选集
 
@@ -147,7 +147,7 @@ Sources: [base.py](src/jobscrape/discovery/base.py#L48-L49), [base.py](src/jobsc
 
 两者都复用基类唯一的 `_finalize`，因此无论列表页结构如何不同，最终写库的字段集与过滤语义完全一致。这种“平台差异下沉到候选集准备、过滤语义上提到基类”的分工，正是“采集器基类”存在的价值。抓取层的实现细节分别见 [Boss 直聘采集：滚动加载与薪资字体反爬](11-boss-zhi-pin-cai-ji-gun-dong-jia-zai-yu-xin-zi-zi-ti-fan-pa) 与 [猎聘采集：XHR 拦截与分页翻页](12-xi-pin-cai-ji-xhr-lan-jie-yu-fen-ye-fan-ye)。
 
-Sources: [boss.py](src/jobscrape/discovery/boss.py#L107-L116), [liepin.py](src/jobscrape/discovery/liepin.py#L59-L84), [liepin.py](src/jobscrape/discovery/liepin.py#L157-L159)
+Sources: [boss.py](../../../../src/jobscrape/discovery/boss.py#L107-L116), [liepin.py](../../../../src/jobscrape/discovery/liepin.py#L59-L84), [liepin.py](../../../../src/jobscrape/discovery/liepin.py#L157-L159)
 
 ## 过滤结果的去向：保留、跳过与翻案
 

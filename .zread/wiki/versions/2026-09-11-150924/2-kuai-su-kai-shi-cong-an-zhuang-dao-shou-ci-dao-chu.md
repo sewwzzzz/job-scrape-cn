@@ -13,7 +13,7 @@ flowchart TD
     F --> G["jp export<br/>导出 JSON / CSV"]
 ```
 
-Sources: [README.md](README.md#L36-L57), [src/jobscrape/cli.py](src/jobscrape/cli.py#L26-L186)
+Sources: [README.md](../../../../README.md#L36-L57), [src/jobscrape/cli.py](../../../../src/jobscrape/cli.py#L26-L186)
 
 ## 前置条件：Python 与浏览器底座
 
@@ -28,7 +28,7 @@ Sources: [README.md](README.md#L36-L57), [src/jobscrape/cli.py](src/jobscrape/cl
 
 `jp` 命令由 `[project.scripts]` 中的 `jp = "jobscrape.cli:main"` 注册，安装后即可全局调用。
 
-Sources: [pyproject.toml](pyproject.toml#L5-L23), [README.md](README.md#L33-L34)
+Sources: [pyproject.toml](../../../../pyproject.toml#L5-L23), [README.md](../../../../README.md#L33-L34)
 
 ## 第 1 步：安装项目与 Chromium
 
@@ -41,7 +41,7 @@ Sources: [pyproject.toml](pyproject.toml#L5-L23), [README.md](README.md#L33-L34)
 
 安装细节（虚拟环境、离线环境、镜像加速等）由 [安装与环境准备](3-an-zhuang-yu-huan-jing-zhun-bei) 专页展开；本页只要求你能在终端成功打印出 `jp --help` 即视为安装完成。
 
-Sources: [README.md](README.md#L19-L34), [pyproject.toml](pyproject.toml#L8-L16)
+Sources: [README.md](../../../../README.md#L19-L34), [pyproject.toml](../../../../pyproject.toml#L8-L16)
 
 ## 第 2 步：初始化运行时目录（`jp init`）
 
@@ -71,7 +71,7 @@ jp init --force         # 覆盖已存在的 profile.json / searches.yaml
 
 `jp init` 会在结束语中提示编辑上述两个文件，并给出下一步的登录命令，形成引导闭环。
 
-Sources: [src/jobscrape/cli.py](src/jobscrape/cli.py#L26-L38), [src/jobscrape/config.py](src/jobscrape/config.py#L34-L78), [src/jobscrape/db.py](src/jobscrape/db.py#L14-L51)
+Sources: [src/jobscrape/cli.py](../../../../src/jobscrape/cli.py#L26-L38), [src/jobscrape/config.py](../../../../src/jobscrape/config.py#L34-L78), [src/jobscrape/db.py](../../../../src/jobscrape/db.py#L14-L51)
 
 ## 第 3 步：编辑搜索与过滤配置
 
@@ -94,7 +94,7 @@ liepin:
 
 配置项的完整语义（合法枚举值、城市代码覆盖、年限/学历档位映射）分别见 [搜索任务配置：关键词与城市](5-sou-suo-ren-wu-pei-zhi-guan-jian-ci-yu-cheng-shi) 与 [过滤偏好配置](6-guo-lu-pian-hao-pei-zhi)。若首次只是想验证链路是否通畅，可直接使用模板默认值，无需修改。
 
-Sources: [src/jobscrape/searches.example.yaml](src/jobscrape/searches.example.yaml#L1-L30), [src/jobscrape/config.py](src/jobscrape/config.py#L16-L31), [README.md](README.md#L85-L158)
+Sources: [src/jobscrape/searches.example.yaml](../../../../src/jobscrape/searches.example.yaml#L1-L30), [src/jobscrape/config.py](../../../../src/jobscrape/config.py#L16-L31), [README.md](../../../../README.md#L85-L158)
 
 ## 第 4 步：扫码登录（`jp login`）
 
@@ -107,7 +107,7 @@ jp login liepin     # 猎聘，微信扫码，双证据判定（登录/注册消
 
 两个平台采用**不同的登录态判定策略**：Boss 直接检查 cookie 名是否命中 `wt2`、`wt`、`bst`；猎聘采用「双证据防假阳性」——同时满足「页面出现『登录/注册』字样消失」且「出现『消息』/『我的简历』/『退出』任一关键词」才算登录成功。猎聘的登录 token 存放在 `sessionStorage` 中，因此落盘时会在 `storage_state` 之外额外补抓 `session_storage`。
 
-Sources: [src/jobscrape/cli.py](src/jobscrape/cli.py#L55-L103), [src/jobscrape/discovery/browser.py](src/jobscrape/discovery/browser.py#L58-L112)
+Sources: [src/jobscrape/cli.py](../../../../src/jobscrape/cli.py#L55-L103), [src/jobscrape/discovery/browser.py](../../../../src/jobscrape/discovery/browser.py#L58-L112)
 
 ## 第 5 步：抓岗与抓 JD（`jp run`）
 
@@ -129,7 +129,7 @@ jp enrich --max 50              # 单独补抓 JD；跑完看 jp status 决定�
 
 抓 JD 时每条之间会**随机间隔 2–4 秒**（防风控），因此 50 条约需 3 分钟；中途 `Ctrl+C` 无害，重跑会接着补。每个岗位的 JD 最多**自动重试 3 次**（靠 `enrich_attempts < 3` 限制），超过后不再自动重试。流水线的幂等性来自「列级状态机」——某阶段完成即该阶段负责的列非 `NULL`，详见 [两阶段流水线的编排与幂等续传](7-liang-jie-duan-liu-shui-xian-de-bian-pai-yu-mi-deng-xu-chuan)。
 
-Sources: [src/jobscrape/cli.py](src/jobscrape/cli.py#L106-L145), [src/jobscrape/pipeline.py](src/jobscrape/pipeline.py#L27-L79), [src/jobscrape/enrichment/detail.py](src/jobscrape/enrichment/detail.py#L35-L71), [README.md](README.md#L49-L81)
+Sources: [src/jobscrape/cli.py](../../../../src/jobscrape/cli.py#L106-L145), [src/jobscrape/pipeline.py](../../../../src/jobscrape/pipeline.py#L27-L79), [src/jobscrape/enrichment/detail.py](../../../../src/jobscrape/enrichment/detail.py#L35-L71), [README.md](../../../../README.md#L49-L81)
 
 ## 第 6 步：查看状态（`jp status`）
 
@@ -145,7 +145,7 @@ Sources: [src/jobscrape/cli.py](src/jobscrape/cli.py#L106-L145), [src/jobscrape/
 
 只要「待抓 JD」不为 0，就说明还有岗位没补全 JD，再跑一次 `jp enrich --max 50` 即可（已完成的行不会被重复抓取，靠 `detail_scraped_at` 判断）。
 
-Sources: [src/jobscrape/cli.py](src/jobscrape/cli.py#L41-L52), [src/jobscrape/db.py](src/jobscrape/db.py#L119-L134), [README.md](README.md#L73-L79)
+Sources: [src/jobscrape/cli.py](../../../../src/jobscrape/cli.py#L41-L52), [src/jobscrape/db.py](../../../../src/jobscrape/db.py#L119-L134), [README.md](../../../../README.md#L73-L79)
 
 ## 第 7 步：首次导出（`jp export`）
 
@@ -168,7 +168,7 @@ jp export --include-rejected               # 连同被过滤的岗位一起导�
 
 需要强调的是：**导出只是快照，数据始终留在 `db.sqlite3` 里**。不导出也不会丢数据，随时可重跑 `jp export` 生成新快照，或用任意 SQLite 客户端直连数据库查询，详见 [数据字典与数据库直连查询](20-shu-ju-zi-dian-yu-shu-ju-ku-zhi-lian-cha-xun)。
 
-Sources: [src/jobscrape/cli.py](src/jobscrape/cli.py#L148-L167), [src/jobscrape/export.py](src/jobscrape/export.py#L17-L69), [README.md](README.md#L52-L54)
+Sources: [src/jobscrape/cli.py](../../../../src/jobscrape/cli.py#L148-L167), [src/jobscrape/export.py](../../../../src/jobscrape/export.py#L17-L69), [README.md](../../../../README.md#L52-L54)
 
 ## 首次导出验证清单
 
@@ -183,7 +183,7 @@ Sources: [src/jobscrape/cli.py](src/jobscrape/cli.py#L148-L167), [src/jobscrape/
 | `exports/` 目录 | 出现 `jobs-<日期>.json` / `.csv` | 未执行 `jp export` |
 | CSV 用 Excel 打开 | 中文正常、不乱码 | 编码问题（应为 UTF-8 BOM） |
 
-Sources: [src/jobscrape/cli.py](src/jobscrape/cli.py#L14-L17), [src/jobscrape/db.py](src/jobscrape/db.py#L119-L134), [src/jobscrape/export.py](src/jobscrape/export.py#L48-L69)
+Sources: [src/jobscrape/cli.py](../../../../src/jobscrape/cli.py#L14-L17), [src/jobscrape/db.py](../../../../src/jobscrape/db.py#L119-L134), [src/jobscrape/export.py](../../../../src/jobscrape/export.py#L48-L69)
 
 ## 常见问题速查
 
@@ -200,7 +200,7 @@ Sources: [src/jobscrape/cli.py](src/jobscrape/cli.py#L14-L17), [src/jobscrape/db
 
 其中「验证页人工暂停」是一个有意设计的行为：交互终端下等待回车，非交互环境最多轮询 10 分钟，达到超时才会抛错，绝不会用 `input()` 把后台进程挂死。
 
-Sources: [README.md](README.md#L219-L228), [src/jobscrape/discovery/browser.py](src/jobscrape/discovery/browser.py#L123-L145), [src/jobscrape/dd](src/jobscrape/enrichment/detail.py#L35-L71), [src/jobscrape/enrichment/detail.py](src/jobscrape/enrichment/detail.py#L58-L69)
+Sources: [README.md](../../../../README.md#L219-L228), [src/jobscrape/discovery/browser.py](../../../../src/jobscrape/discovery/browser.py#L123-L145), [src/jobscrape/dd](../../../../src/jobscrape/enrichment/detail.py#L35-L71), [src/jobscrape/enrichment/detail.py](../../../../src/jobscrape/enrichment/detail.py#L58-L69)
 
 ## 下一步阅读
 

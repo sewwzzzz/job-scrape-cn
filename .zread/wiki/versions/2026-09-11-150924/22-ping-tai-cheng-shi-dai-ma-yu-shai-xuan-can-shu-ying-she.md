@@ -1,6 +1,6 @@
 JobScrape-CN 需要同时对接 Boss 直聘与猎聘两个招聘平台，而两个平台对"同一座城市""同一档学历""同一段年限"使用了**完全不同的编码体系**：北京在 Boss 是 `101010100`，在猎聘却是 `010`；本科在 Boss 是 `degree=203`，在猎聘却是 `eduLevel=040`。本页说明这套映射体系如何被组织、如何被搜索配置覆盖，以及哪些筛选参数是**服务端生效**、哪些只能**本地兜底**。理解这套映射，是正确编写 `searches.yaml` 与排查"配了城市却抓到外地岗位""配了学历却毫无效果"类问题的前提。
 
-Sources: [boss.py](src/jobscrape/discovery/boss.py#L18-L43), [liepin.py](src/jobscrape/discovery/liepin.py#L17-L30)
+Sources: [boss.py](../../../../src/jobscrape/discovery/boss.py#L18-L43), [liepin.py](../../../../src/jobscrape/discovery/liepin.py#L17-L30)
 
 ## 映射体系的整体设计
 
@@ -21,7 +21,7 @@ flowchart LR
     AF --> DB["jobs 表"]
 ```
 
-Sources: [boss.py](src/jobscrape/discovery/boss.py#L86-L105), [liepin.py](src/jobscrape/discovery/liepin.py#L41-L57), [base.py](src/jobscrape/discovery/base.py#L89-L155), [searches.example.yaml](src/jobscrape/searches.example.yaml#L1-L17)
+Sources: [boss.py](../../../../src/jobscrape/discovery/boss.py#L86-L105), [liepin.py](../../../../src/jobscrape/discovery/liepin.py#L41-L57), [base.py](../../../../src/jobscrape/discovery/base.py#L89-L155), [searches.example.yaml](../../../../src/jobscrape/searches.example.yaml#L1-L17)
 
 ## 城市代码：内置表与三级覆盖
 
@@ -52,7 +52,7 @@ flowchart TD
     Q2 -->|否| D["回落到默认值<br/>Boss=101010100 / 猎聘=010"]
 ```
 
-Sources: [boss.py](src/jobscrape/discovery/boss.py#L18-L24), [boss.py](src/jobscrape/discovery/boss.py#L87), [liepin.py](src/jobscrape/discovery/liepin.py#L17-L23), [liepin.py](src/jobscrape/discovery/liepin.py#L48), [searches.example.yaml](src/jobscrape/searches.example.yaml#L5-L7), [test_liepin_city.py](tests/test_liepin_city.py#L36-L39)
+Sources: [boss.py](../../../../src/jobscrape/discovery/boss.py#L18-L24), [boss.py](../../../../src/jobscrape/discovery/boss.py#L87), [liepin.py](../../../../src/jobscrape/discovery/liepin.py#L17-L23), [liepin.py](../../../../src/jobscrape/discovery/liepin.py#L48), [searches.example.yaml](../../../../src/jobscrape/searches.example.yaml#L5-L7), [test_liepin_city.py](../../../../tests/test_liepin_city.py#L36-L39)
 
 ## 猎聘的城市陷阱：`city` 与 `dq` 双参数
 
@@ -65,7 +65,7 @@ flowchart LR
     U --> R["dq 真正生效过滤<br/>city 仅影响展示"]
 ```
 
-Sources: [liepin.py](src/jobscrape/discovery/liepin.py#L45-L49), [test_liepin_city.py](tests/test_liepin_city.py#L29-L33)
+Sources: [liepin.py](../../../../src/jobscrape/discovery/liepin.py#L45-L49), [test_liepin_city.py](../../../../tests/test_liepin_city.py#L29-L33)
 
 ## 客户端城市兜底与名称归一
 
@@ -80,7 +80,7 @@ Sources: [liepin.py](src/jobscrape/discovery/liepin.py#L45-L49), [test_liepin_ci
 | `深圳` | `深圳` | 丢弃 |
 | `""`（空） | `""` | 保留（不误杀） |
 
-Sources: [liepin.py](src/jobscrape/discovery/liepin.py#L62-L63), [liepin.py](src/jobscrape/discovery/liepin.py#L140-L159), [liepin.py](src/jobscrape/discovery/liepin.py#L192-L195), [test_liepin_city.py](tests/test_liepin_city.py#L22-L59)
+Sources: [liepin.py](../../../../src/jobscrape/discovery/liepin.py#L62-L63), [liepin.py](../../../../src/jobscrape/discovery/liepin.py#L140-L159), [liepin.py](../../../../src/jobscrape/discovery/liepin.py#L192-L195), [test_liepin_city.py](../../../../tests/test_liepin_city.py#L22-L59)
 
 ## 筛选参数映射：服务端生效 vs 本地兜底
 
@@ -95,7 +95,7 @@ Sources: [liepin.py](src/jobscrape/discovery/liepin.py#L62-L63), [liepin.py](src
 
 Boss 的年限与学历都能通过服务端参数生效；猎聘**只有学历参数可用**，年限参数（`workYearCode`）实测不改变结果，因此配了 `experience` 只会打印一条提示，引导用户改用 `profile.json` 的本地过滤。薪资方面，Boss 的 `boss_salary` 值被**原样透传**为 URL 的 `salary` 参数（例如 `"402"` 表示 20-30K），映射表中不含任何翻译逻辑。
 
-Sources: [searches.example.yaml](src/jobscrape/searches.example.yaml#L4-L17), [boss.py](src/jobscrape/discovery/boss.py#L86-L105), [liepin.py](src/jobscrape/discovery/liepin.py#L41-L57)
+Sources: [searches.example.yaml](../../../../src/jobscrape/searches.example.yaml#L4-L17), [boss.py](../../../../src/jobscrape/discovery/boss.py#L86-L105), [liepin.py](../../../../src/jobscrape/discovery/liepin.py#L41-L57)
 
 ## Boss 服务端参数映射表
 
@@ -112,7 +112,7 @@ Boss 发现器维护两张映射表，分别对应 `experience` 与 `degree` 两
 
 注释明确标注这些代码在 `2026-09` 经过逐档实测（每档 15 张卡片全部命中），并特意排除了混合档 `201`。测试对映射做了回归校验：`3-5年` → `experience=105`、`1年以内` → `experience=103`、`本科` → `degree=203`、`博士` → `degree=205`，且未配置的维度不应出现在 URL 中。
 
-Sources: [boss.py](src/jobscrape/discovery/boss.py#L26-L43), [test_experience.py](tests/test_experience.py#L100-L122)
+Sources: [boss.py](../../../../src/jobscrape/discovery/boss.py#L26-L43), [test_experience.py](../../../../tests/test_experience.py#L100-L122)
 
 ## 猎聘学历映射与年限的显式降级
 
@@ -126,7 +126,7 @@ Sources: [boss.py](src/jobscrape/discovery/boss.py#L26-L43), [test_experience.py
 
 可以看到，**同一档学历在两平台的代码不同**：本科在 Boss 是 `203`、在猎聘是 `040`；硕士在 Boss 是 `204`、在猎聘是 `030`。这正是映射体系必须按平台隔离的根本原因。
 
-Sources: [liepin.py](src/jobscrape/discovery/liepin.py#L28-L30), [liepin.py](src/jobscrape/discovery/liepin.py#L42-L56), [test_education.py](tests/test_education.py#L71-L80)
+Sources: [liepin.py](../../../../src/jobscrape/discovery/liepin.py#L28-L30), [liepin.py](../../../../src/jobscrape/discovery/liepin.py#L42-L56), [test_education.py](../../../../tests/test_education.py#L71-L80)
 
 ## 非法参数：显式报错而非静默失效
 
@@ -134,13 +134,13 @@ Sources: [liepin.py](src/jobscrape/discovery/liepin.py#L28-L30), [liepin.py](src
 
 需要注意的是两个平台对"不支持的参数"处理方式不同：**非法取值**（如 Boss 写 `3年`、猎聘写 `博士后`）一律抛 `ValueError`；而**平台整体不支持的参数**（猎聘的 `experience`）只打印提示、不中断流程，因为配置本身在语法上合法，只是该平台无此能力。两条路径的差异体现了"配置错误"与"能力缺失"的语义区分。
 
-Sources: [boss.py](src/jobscrape/discovery/boss.py#L91-L104), [liepin.py](src/jobscrape/discovery/liepin.py#L42-L56), [test_experience.py](tests/test_experience.py#L106-L121), [test_education.py](tests/test_education.py#L77-L79)
+Sources: [boss.py](../../../../src/jobscrape/discovery/boss.py#L91-L104), [liepin.py](../../../../src/jobscrape/discovery/liepin.py#L42-L56), [test_experience.py](../../../../tests/test_experience.py#L106-L121), [test_education.py](../../../../tests/test_education.py#L77-L79)
 
 ## 配置注入与加载路径
 
 这些参数最终由 pipeline 从 `searches.yaml` 加载后，按平台切片注入发现器。`config.load_searches` 只保留 `boss` 与 `liepin` 两个顶层键，其余内容被过滤；`run_pipeline` 再按 `opts.platforms` 逐平台取出对应配置字典 `conf`，传给 `discoverer.run`，最终到达 `build_url`。这种设计意味着**每个平台拥有独立的映射空间**，一个平台的城市代码或学历代码不会污染另一个平台。
 
-Sources: [config.py](src/jobscrape/config.py#L88-L95), [pipeline.py](src/jobscrape/pipeline.py#L27-L70)
+Sources: [config.py](../../../../src/jobscrape/config.py#L88-L95), [pipeline.py](../../../../src/jobscrape/pipeline.py#L27-L70)
 
 ## 小结与延伸阅读
 

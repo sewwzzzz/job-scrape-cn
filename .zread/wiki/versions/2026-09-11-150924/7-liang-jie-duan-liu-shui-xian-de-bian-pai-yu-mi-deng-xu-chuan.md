@@ -6,7 +6,7 @@
 
 这一约束在仓库的维护约定中被列为第一要务：**列级状态机即阶段契约**，阶段完成的定义就是该阶段负责的列非 NULL，且明确「不要引入断点文件」。因此，`pipeline.py` 的编排代码异常精简——它几乎不含业务逻辑，只负责连接数据库、遍历平台、按开关调用两个阶段，并把它们的异常收集到一份结果清单里。
 
-Sources: [pipeline.py](src/jobscrape/pipeline.py#L1-L4), [CHANGELOG.md](CHANGELOG.md#L49-L57)
+Sources: [pipeline.py](../../../../src/jobscrape/pipeline.py#L1-L4), [CHANGELOG.md](../../../../CHANGELOG.md#L49-L57)
 
 ## 编排骨架：run_pipeline 与 _run_platform
 
@@ -34,7 +34,7 @@ flowchart TD
     NEXT -->|否| CLOSE["finally: conn.close()"]
 ```
 
-Sources: [pipeline.py](src/jobscrape/pipeline.py#L27-L43), [pipeline.py](src/jobscrape/pipeline.py#L46-L79)
+Sources: [pipeline.py](../../../../src/jobscrape/pipeline.py#L27-L43), [pipeline.py](../../../../src/jobscrape/pipeline.py#L46-L79)
 
 ## RunOptions 与 RunResult：一个编排函数、三种命令形态
 
@@ -50,7 +50,7 @@ Sources: [pipeline.py](src/jobscrape/pipeline.py#L27-L43), [pipeline.py](src/job
 
 `max_per_search` 这一个参数身兼两职：它既是「每个关键词 × 每个城市」的列表抓取上限，也是这一轮 JD 抓取的条数上限。这种复用让 `--max` 的语义在两个阶段间保持统一，用户无需为不同阶段记忆两个不同的上限值。
 
-Sources: [pipeline.py](src/jobscrape/pipeline.py#L13-L24), [cli.py](src/jobscrape/cli.py#L106-L145), [README.md](README.md#L71-L73)
+Sources: [pipeline.py](../../../../src/jobscrape/pipeline.py#L13-L24), [cli.py](../../../../src/jobscrape/cli.py#L106-L145), [README.md](../../../../README.md#L71-L73)
 
 ## 多粒度错误隔离：崩溃只影响一个单元
 
@@ -71,7 +71,7 @@ flowchart TD
     G -->|抛异常| E4["errors[enrich:p]"]
 ```
 
-Sources: [pipeline.py](src/jobscrape/pipeline.py#L37-L40), [pipeline.py](src/jobscrape/pipeline.py#L60-L78), [cli.py](src/jobscrape/cli.py#L170-L181)
+Sources: [pipeline.py](../../../../src/jobscrape/pipeline.py#L37-L40), [pipeline.py](../../../../src/jobscrape/pipeline.py#L60-L78), [cli.py](../../../../src/jobscrape/cli.py#L170-L181)
 
 ## 单会话复用：登录态只验一次
 
@@ -79,7 +79,7 @@ Sources: [pipeline.py](src/jobscrape/pipeline.py#L37-L40), [pipeline.py](src/job
 
 `BrowserSession` 以上下文管理器实现，进入时启动有头 Chromium 并回灌持久化的 Cookie 与 storage state，退出时再把最新登录态落盘。因为整个 `_run_platform` 把两个阶段都包在 `with BrowserSession(platform) as session:` 之内，所以无论是 discover 还是 enrich 抛出的异常，会话都会在 `__exit__` 中正确保存并关闭。浏览器底座的完整封装细节见 [浏览器会话封装与登录态持久化](13-liu-lan-qi-hui-hua-feng-zhuang-yu-deng-lu-tai-chi-jiu-hua)。
 
-Sources: [pipeline.py](src/jobscrape/pipeline.py#L56-L57), [browser.py](src/jobscrape/discovery/browser.py#L148-L200)
+Sources: [pipeline.py](../../../../src/jobscrape/pipeline.py#L56-L57), [browser.py](../../../../src/jobscrape/discovery/browser.py#L148-L200)
 
 ## 幂等续传的两块基石
 
@@ -104,7 +104,7 @@ flowchart LR
     B -. 崩溃 .-> E
 ```
 
-Sources: [db.py](src/jobscrape/db.py#L86-L99), [models.py](src/jobscrape/models.py#L15-L18), [pipeline.py](src/jobscrape/pipeline.py#L67-L68)
+Sources: [db.py](../../../../src/jobscrape/db.py#L86-L99), [models.py](../../../../src/jobscrape/models.py#L15-L18), [pipeline.py](../../../../src/jobscrape/pipeline.py#L67-L68)
 
 ## enrich 的续传取数：每轮只取未完成的行
 
@@ -120,7 +120,7 @@ enrich 阶段把「续传」落到了具体的查询上。`enrich_jobs` 通过 `
 | `ORDER BY discovered_at ASC` | 先发现先抓 | 保证推进顺序稳定 |
 | `[:limit]` | 本轮上限 | 抓满即停，可分批续抓 |
 
-Sources: [detail.py](src/jobscrape/enrichment/detail.py#L35-L71), [README.md](README.md#L73-L81), [CHANGELOG.md](CHANGELOG.md#L55)
+Sources: [detail.py](../../../../src/jobscrape/enrichment/detail.py#L35-L71), [README.md](../../../../README.md#L73-L81), [CHANGELOG.md](../../../../CHANGELOG.md#L55)
 
 ## 端到端数据流全景
 
@@ -146,7 +146,7 @@ flowchart LR
 
 需要牢记的一条边界铁律是：**discovery 只写 discover 列，enrichment 只写 enrich 列**。跨模块写列会破坏「阶段完成 = 该列非空」的判据，从而破坏续传语义——这正是编排层能保持精简的前提，也是后续改动时不可破坏的约束。
 
-Sources: [pipeline.py](src/jobscrape/pipeline.py#L27-L79), [db.py](src/jobscrape/db.py#L1-L5), [CHANGELOG.md](CHANGELOG.md#L51-L53)
+Sources: [pipeline.py](../../../../src/jobscrape/pipeline.py#L27-L79), [db.py](../../../../src/jobscrape/db.py#L1-L5), [CHANGELOG.md](../../../../CHANGELOG.md#L51-L53)
 
 ## 下一步
 

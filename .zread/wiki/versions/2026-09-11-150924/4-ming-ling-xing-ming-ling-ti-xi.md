@@ -6,7 +6,7 @@
 
 `jp` 这个可执行名不是硬编码的，而是由打包元数据声明的**控制台脚本入口点**：`pyproject.toml` 的 `[project.scripts]` 把 `jp` 映射到 `jobscrape.cli:main`，安装后由 Python 生成同名可执行文件。
 
-Sources: [pyproject.toml](pyproject.toml#L15-L16)
+Sources: [pyproject.toml](../../../../pyproject.toml#L15-L16)
 
 对应的 Python 侧，`cli.py` 用 Typer 声明了一个应用实例并定义了一个极薄的 `main()` 函数：
 
@@ -19,7 +19,7 @@ def main() -> None:
 
 也就是说 `jp` 的一切行为都由 Typer 应用 `app` 承载，`main()` 只是把它触发。此外模块顶部用 `PLATFORMS = ("boss", "liepin")` 定义了**唯一的平台全集常量**，并提供一个校验辅助函数 `_platforms(platform, default_all=True)`：当传入 `"all"` 时展开为两个平台，否则原样返回单个平台，遇到非法值则直接 `typer.Exit` 报错结束。这是后面 `discover / enrich / run` 三个命令共享平台解析逻辑的根源。
 
-Sources: [cli.py](src/jobscrape/cli.py#L14-L23)
+Sources: [cli.py](../../../../src/jobscrape/cli.py#L14-L23)
 
 ## 命令全景
 
@@ -37,25 +37,25 @@ Sources: [cli.py](src/jobscrape/cli.py#L14-L23)
 
 这张表与项目 README 的「命令一览」保持一致，可作为最日常的快速参考。
 
-Sources: [README.md](README.md#L59-L81)
+Sources: [README.md](../../../../README.md#L59-L81)
 
 ## 初始化与状态观测：`init` / `status`
 
 `jp init` 是**第一次使用前的唯一准备步骤**。它按顺序做三件事：先调用 `config.runtime_dir()` 创建运行时目录，再打开数据库连接并执行建表，最后写出过滤配置与搜索配置两个模板文件。命令输出会明确告诉用户两个文件的实际路径，并提示"下一步扫码登录"。
 
-Sources: [cli.py](src/jobscrape/cli.py#L26-L38)
+Sources: [cli.py](../../../../src/jobscrape/cli.py#L26-L38)
 
 其中 `runtime_dir()` 的目录位置由环境变量 `JOBSCRAPE_HOME` 决定，缺省为 `~/.job-scrape-cn`，并会自动补建 `cookies/`、`exports/` 子目录。两个模板则由 `init_profile()` 与 `init_searches()` 负责：前者写入默认 `profile.json`，后者把包内的 `searches.example.yaml` 复制为 `searches.yaml`。二者都遵循"**已存在则跳过**"的策略，除非显式加 `--force` 才会覆盖。
 
-Sources: [config.py](src/jobscrape/config.py#L34-L78)
+Sources: [config.py](../../../../src/jobscrape/config.py#L34-L78)
 
 `--force` 选项直接声明在 `init` 函数签名里（`force: bool = typer.Option(False, "--force", ...)`），作用就是覆盖已存在的 `profile.json` / `searches.yaml`。
 
-Sources: [cli.py](src/jobscrape/cli.py#L27-L29)
+Sources: [cli.py](../../../../src/jobscrape/cli.py#L27-L29)
 
 `jp status` 则是**只读的健康检查**。它建立数据库连接、确保表存在，然后把 `db.counts()` 返回的字典渲染成一张两列表格输出。`db.counts()` 是计数板的唯一数据源，固定输出五个指标。
 
-Sources: [cli.py](src/jobscrape/cli.py#L41-L52)
+Sources: [cli.py](../../../../src/jobscrape/cli.py#L41-L52)
 
 | 计数板指标 | 口径（对应列谓词） |
 | --- | --- |
@@ -67,21 +67,21 @@ Sources: [cli.py](src/jobscrape/cli.py#L41-L52)
 
 这五个计数背后其实是**列级状态谓词**：某阶段"完成"= 该阶段负责的列非 NULL。这些谓词集中定义在 `models.py`（如 `PENDING_ENRICH`），被 `enrich` 命令和 `status` 计数板共同复用，是理解"续传"语义的关键锚点。
 
-Sources: [db.py](src/jobscrape/db.py#L119-L134), [models.py](src/jobscrape/models.py#L16-L23)
+Sources: [db.py](../../../../src/jobscrape/db.py#L119-L134), [models.py](../../../../src/jobscrape/models.py#L16-L23)
 
 ## 扫码登录：`login`
 
 `jp login` 是**唯一使用位置参数而非选项的命令**：调用形态是 `jp login boss` 或 `jp login liepin`，平台名作为 `typer.Argument` 传入，且必须显式给出（否则 argparse 层报错）；传入非 `boss / liepin` 的值会被直接拒绝。
 
-Sources: [cli.py](src/jobscrape/cli.py#L55-L59)
+Sources: [cli.py](../../../../src/jobscrape/cli.py#L55-L59)
 
 登录流程会针对平台打开对应首页（Boss 为 `zhipin.com`，猎聘为 `liepin.com`），随后进入一个**轮询循环**：每 5 秒检测一次登录状态。检测方式因平台而异——Boss 走 cookie 名判断（是否出现 `wt2` / `wt` / `bst`），猎聘则用"双证据"防假阳性（页面文本中"登录/注册"消失且出现任一登录后导航词）。一旦检测到登录态就会即时落盘，未登录时也每 30 秒兜底保存一次，即使检测失误也不丢态。当浏览器窗口被关闭，循环即退出。
 
-Sources: [cli.py](src/jobscrape/cli.py#L60-L103)
+Sources: [cli.py](../../../../src/jobscrape/cli.py#L60-L103)
 
 初学者最容易困惑的一点是：**`login` 命令不会自己结束**，它会一直阻塞，直到你手动关掉浏览器窗口（或 Ctrl+C）。登录态最终保存在 `~/.job-scrape-cn/cookies/<平台>.json`。README 也特别说明关掉窗口即保存、约一周有效。
 
-Sources: [README.md](README.md#L45-L48)
+Sources: [README.md](../../../../README.md#L45-L48)
 
 ## 采集三兄弟：`discover` / `enrich` / `run`
 
@@ -91,7 +91,7 @@ Sources: [README.md](README.md#L45-L48)
 - `enrich`：只补抓 JD 全文，构造 `RunOptions(do_discover=False)`
 - `run`：两阶段全跑，`RunOptions` 的 `do_discover` 与 `do_enrich` 均取默认真值
 
-Sources: [cli.py](src/jobscrape/cli.py#L106-L145)
+Sources: [cli.py](../../../../src/jobscrape/cli.py#L106-L145)
 
 `RunOptions` 是这四个字段的行为契约：
 
@@ -102,11 +102,11 @@ Sources: [cli.py](src/jobscrape/cli.py#L106-L145)
 | `do_discover` | `True` | 是否执行列表采集阶段 |
 | `do_enrich` | `True` | 是否执行 JD 全文阶段 |
 
-Sources: [pipeline.py](src/jobscrape/pipeline.py#L13-L18)
+Sources: [pipeline.py](../../../../src/jobscrape/pipeline.py#L13-L18)
 
 理解 `--max` 的**双重含义**是使用这套命令的关键：它既是"每个关键词 × 每个城市"的列表抓取上限，也是**本轮抓 JD 的条数上限**。因此当岗位总数多于 `--max` 时，会有部分行暂时没有 JD 全文——这是设计使然，多跑几次 `jp enrich` 即可补齐，已完成的行不会被重复抓取。
 
-Sources: [README.md](README.md#L71-L79)
+Sources: [README.md](../../../../README.md#L71-L79)
 
 下面这张流程图刻画了 `jp run` 在单平台内的实际走向，可帮助你区分"命令入口"与"流水线内部"：
 
@@ -129,29 +129,29 @@ flowchart TD
 
 `_print_result` 是三个采集命令共用的收尾函数：若 `RunResult.stats` 非空则渲染"执行统计"表，若 `RunResult.errors` 非空则以红色列出每个失败项（且错误内容被截断到 200 字符）。
 
-Sources: [cli.py](src/jobscrape/cli.py#L170-L181)
+Sources: [cli.py](../../../../src/jobscrape/cli.py#L170-L181)
 
 流水线本身的设计哲学是"**单平台崩溃不影响另一平台**"：`run_pipeline` 逐平台调用 `_run_platform`，并用 `try/except` 把异常收进 `result.errors` 而不中断整体；`_run_platform` 内部同样对每个关键词的采集、对 enrich 阶段分别兜底。这正是为什么命令在无浏览器、无登录态时**不会崩溃**，而是把错误优雅地回显到结果表里。
 
-Sources: [pipeline.py](src/jobscrape/pipeline.py#L27-L78)
+Sources: [pipeline.py](../../../../src/jobscrape/pipeline.py#L27-L78)
 
 这也解释了 `jp run` 的**幂等续传**特性：任何阶段崩溃后直接重跑即可接着补，无需断点文件——续传完全依赖数据库的列级状态机。
 
-Sources: [pipeline.py](src/jobscrape/pipeline.py#L1-L4)
+Sources: [pipeline.py](../../../../src/jobscrape/pipeline.py#L1-L4)
 
 ## 数据导出：`export`
 
 `jp export` 是**唯一不接触浏览器的数据出口**。它接受三个选项：`--fmt`（`json` / `csv` / `all`，默认 `all`）、`--include-rejected`（是否一并导出被过滤的岗位）、`--out-dir`（输出目录，默认 `~/.job-scrape-cn/exports/`）。
 
-Sources: [cli.py](src/jobscrape/cli.py#L148-L167)
+Sources: [cli.py](../../../../src/jobscrape/cli.py#L148-L167)
 
 命令内部先查一次 `export.select_rows()` 拿到行数用于回显，再调用 `export.export_jobs()` 真正写文件。默认过滤逻辑是"排除被过滤岗位"（`reject_reason IS NULL`），除非加 `--include-rejected`；导出字段由 `export.FIELDS` 固定，与数据字典页的字段清单一致。
 
-Sources: [export.py](src/jobscrape/export.py#L17-L33)
+Sources: [export.py](../../../../src/jobscrape/export.py#L17-L33)
 
 输出文件带日期戳（`jobs-YYYY-MM-DD.json` / `.csv`），其中 CSV 特意以 `utf-8-sig`（带 BOM）写出，保证 Excel 双击直开不乱码。若 `--fmt` 传入非法值，`export_jobs` 抛出 `ValueError`，命令层捕获后转为 `typer.Exit`，以非零退出码干净地报错结束。
 
-Sources: [export.py](src/jobscrape/export.py#L48-L69), [cli.py](src/jobscrape/cli.py#L158-L164)
+Sources: [export.py](../../../../src/jobscrape/export.py#L48-L69), [cli.py](../../../../src/jobscrape/cli.py#L158-L164)
 
 ## 命令与代码模块的映射关系
 
@@ -181,7 +181,7 @@ flowchart LR
 
 其中多个命令是**延迟导入**（在函数体内 `import`）而非模块顶部导入。例如 `login` 才导入 `BrowserSession`，采集命令才导入 `pipeline`。这种写法让不涉及浏览器的 `init` / `status` / `export` 不会有启动负担，也是源码里值得注意的工程小约定。
 
-Sources: [cli.py](src/jobscrape/cli.py#L60-L60), [cli.py](src/jobscrape/cli.py#L112-L112), [cli.py](src/jobscrape/cli.py#L126-L126), [cli.py](src/jobscrape/cli.py#L140-L140)
+Sources: [cli.py](../../../../src/jobscrape/cli.py#L60-L60), [cli.py](../../../../src/jobscrape/cli.py#L112-L112), [cli.py](../../../../src/jobscrape/cli.py#L126-L126), [cli.py](../../../../src/jobscrape/cli.py#L140-L140)
 
 ## 常见问题排查
 
@@ -196,7 +196,7 @@ Sources: [cli.py](src/jobscrape/cli.py#L60-L60), [cli.py](src/jobscrape/cli.py#L
 
 其中窗口命令 `install chromium` 的提示最初来自 README 的安装说明，而 `load_profile` 在文件缺失时抛出的 `FileNotFoundError` 文案正是"未找到 …。先运行: jp init"。
 
-Sources: [README.md](README.md#L33-L34), [config.py](src/jobscrape/config.py#L81-L85)
+Sources: [README.md](../../../../README.md#L33-L34), [config.py](../../../../src/jobscrape/config.py#L81-L85)
 
 ## 小结与阅读建议
 

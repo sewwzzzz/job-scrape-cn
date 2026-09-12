@@ -1,16 +1,16 @@
 本页聚焦 `discovery/browser.py` 这一"浏览器底座"中与**反爬对抗**直接相关的两块能力：**反检测注入**（让自动化浏览器在指纹层面更像真人）与**验证页人工暂停**（检测到滑块/登录页时把控制权交还给人，而非尝试自动过验证）。二者共用同一份封装文件，是 `BrowserSession` 生命周期里最靠近"平台边缘"的逻辑。理解本页有助于回答"采集为什么会突然停下等人"以及"为什么反检测代码集中在单文件"。
 
-Sources: [browser.py](src/jobscrape/discovery/browser.py#L1-L5)
+Sources: [browser.py](../../../../src/jobscrape/discovery/browser.py#L1-L5)
 
 ## 单点封装原则：反检测为何只住在一个文件
 
 `discovery/browser.py` 被明确设计为 **Playwright 的唯一出口**。文件头注释给出的理由非常直接：将来 Playwright 若被指纹检测识别，整体替换为 `nodriver`/`patchright` 时**只改这一个文件**。这一约束在项目文档中被反复强调，列为"改动时别破坏"的关键设计约束之一——Playwright 只在 `discovery/browser.py` 单点封装。因此，所有反检测相关代码（UA、启动参数、init script、验证页暂停）都不散落在各采集器中，而是收敛于此。各平台的 `boss.py` / `liepin.py` / `enrichment/detail.py` 只通过导入函数获得能力，不自行拼接反检测逻辑。
 
-Sources: [browser.py](src/jobscrape/discovery/browser.py#L1-L5), [README.md](README.md#L17), [CHANGELOG.md](CHANGELOG.md#L56)
+Sources: [browser.py](../../../../src/jobscrape/discovery/browser.py#L1-L5), [README.md](../../../../README.md#L17), [CHANGELOG.md](../../../../CHANGELOG.md#L56)
 
 `BrowserSession` 以**上下文管理器**形式对外暴露：`__enter__` 负责启动浏览器、建上下文、注入反检测并回灌登录态；`__exit__` 负责保存登录态并逐层关闭 context / browser / playwright。`pipeline.py` 的 `_run_platform` 用 `with BrowserSession(platform) as session:` 包裹整个 discover + enrich 流程，使 **discover 与 enrich 共用同一浏览器会话，登录态只验一次**。
 
-Sources: [browser.py](src/jobscrape/discovery/browser.py#L158-L199), [pipeline.py](src/jobscrape/pipeline.py#L46-L57)
+Sources: [browser.py](../../../../src/jobscrape/discovery/browser.py#L158-L199), [pipeline.py](../../../../src/jobscrape/pipeline.py#L46-L57)
 
 ## 反检测注入的三层防线
 
@@ -28,11 +28,11 @@ flowchart TD
 
 **第一层：启动参数。** 启动 Chromium 时传入 `--disable-blink-features=AutomationControlled`，用于消除 `navigator.webdriver` 等由自动化控制标志位触发的检测点；`slow_mo=50` 让每个操作带 50ms 延迟，使动作节奏更接近真人；`--start-maximized` 配合 `viewport=None` 让窗口最大化且不锁定固定视口尺寸，避免"固定分辨率"这一常见指纹特征。是否 headed 由构造参数 `headed: bool = True` 决定，`headless=not self.headed`。
 
-Sources: [browser.py](src/jobscrape/discovery/browser.py#L151-L169)
+Sources: [browser.py](../../../../src/jobscrape/discovery/browser.py#L151-L169)
 
 **第二层：上下文 UA 伪装。** 上下文 `user_agent` 硬编码为一段 **macOS Chrome 135** 的 UA 字符串。注释说明该口径来自 `get_jobs` 时代的实测验证（"get_jobs 验证过的口径"），即经过真实环境检验、能通过平台检测的描述符，而非随意拼接。
 
-Sources: [browser.py](src/jobscrape/discovery/browser.py#L20-L24), [browser.py](src/jobscrape/discovery/browser.py#L165-L169)
+Sources: [browser.py](../../../../src/jobscrape/discovery/browser.py#L20-L24), [browser.py](../../../../src/jobscrape/discovery/browser.py#L165-L169)
 
 **第三层：页面级 init script。** `context.add_init_script(ANTI_DETECTION_JS)` 保证**每个新页面创建时**都自动执行这段反检测脚本。脚本内容与设计动机如下表：
 
@@ -45,11 +45,11 @@ Sources: [browser.py](src/jobscrape/discovery/browser.py#L20-L24), [browser.py](
 
 脚本以 IIFE 包裹，`nativeStr(name)` 辅助函数生成形如 `function table() { [native code] }` 的字符串。核心动机是：自动化框架包装过的函数在 `Function.prototype.toString` 下会暴露 `[native code]` 缺失的破绽，脚本通过重定义 `toString` 把包装痕迹抹平；同时对 console 传入的对象参数做脱敏，避免某些基于 `console.table` 执行耗时的侧信道探测。
 
-Sources: [browser.py](src/jobscrape/discovery/browser.py#L26-L49)
+Sources: [browser.py](../../../../src/jobscrape/discovery/browser.py#L26-L49)
 
 在同一次 `__enter__` 中，还会顺带完成 **sessionStorage 回灌**：由于 `storage_state` 不含 sessionStorage（猎聘把登录 token 放在 sessionStorage），代码把上次保存的 `session_storage` 按 `location.host`/`location.origin` 映射，再以另一段 init script 在每个新页面注入 `sessionStorage.setItem`。这与反检测同属"页面初始态注入"这一机制层，共用 `add_init_script` 通道。
 
-Sources: [browser.py](src/jobscrape/discovery/browser.py#L171-L187), [browser.py](src/jobscrape/discovery/browser.py#L85-L112)
+Sources: [browser.py](../../../../src/jobscrape/discovery/browser.py#L171-L187), [browser.py](../../../../src/jobscrape/discovery/browser.py#L85-L112)
 
 ## 验证页识别：URL 特征匹配
 
@@ -66,7 +66,7 @@ Sources: [browser.py](src/jobscrape/discovery/browser.py#L171-L187), [browser.py
 
 注释明确该清单覆盖"Boss 滑块 / 登录页，猎聘登录页 + 风控拦截（safe.liepin.com/verifysms）"两类平台的典型拦截形态。这种基于 **URL 特征**而非 DOM 内容的判断策略，优势是与页面结构解耦、不依赖易变的选择器；代价是特征清单需随平台改版维护。
 
-Sources: [browser.py](src/jobscrape/discovery/browser.py#L51-L55), [browser.py](src/jobscrape/discovery/browser.py#L119-L120)
+Sources: [browser.py](../../../../src/jobscrape/discovery/browser.py#L51-L55), [browser.py](../../../../src/jobscrape/discovery/browser.py#L119-L120)
 
 ## 人工暂停：TTY 与后台任务的双模式
 
@@ -96,7 +96,7 @@ flowchart TD
 
 这一双模式的核心约束写在文档字符串里：**"绝不能死等 `input()` 把进程挂死"**。交互终端等回车、非交互环境轮询 URL 直到挑战消失、超时抛错——三者共同构成一个在无人值守场景下也不会永久阻塞的等待原语。README 的排错章节也向用户复述了这一语义："程序会暂停并提示人工处理，不会自动过验证（交互终端等回车，非交互环境最多等 10 分钟）"。
 
-Sources: [browser.py](src/jobscrape/discovery/browser.py#L123-L145), [README.md](README.md#L226-L227)
+Sources: [browser.py](../../../../src/jobscrape/discovery/browser.py#L123-L145), [README.md](../../../../README.md#L226-L227)
 
 ## 调用点：三处采集/抓取入口的统一挂载
 
@@ -111,7 +111,7 @@ Sources: [browser.py](src/jobscrape/discovery/browser.py#L123-L145), [README.md]
 
 在 Boss 列表中，调用顺序为：`page.goto` → 打印当前 URL → `pause_if_challenge(page)` → `wait_for_selector` 等卡片出现，确保验证页未通过前不会在错误页面上做无意义等待。猎聘列表同理，在 `goto` 后先暂停再进入分页。JD 抓取阶段亦复刻同一模式：Boss 详情页在 `expect_response` 拦截或降级后调用暂停，猎聘详情页在 `goto` 后立即暂停，再进入最多 15 秒的 React SPA 水合轮询。
 
-Sources: [boss.py](src/jobscrape/discovery/boss.py#L118-L136), [liepin.py](src/jobscrape/discovery/liepin.py#L86-L111), [detail.py](src/jobscrape/enrichment/detail.py#L84-L107), [detail.py](src/jobscrape/enrichment/detail.py#L112-L129)
+Sources: [boss.py](../../../../src/jobscrape/discovery/boss.py#L118-L136), [liepin.py](../../../../src/jobscrape/discovery/liepin.py#L86-L111), [detail.py](../../../../src/jobscrape/enrichment/detail.py#L84-L107), [detail.py](../../../../src/jobscrape/enrichment/detail.py#L112-L129)
 
 ## 设计约束与边界
 

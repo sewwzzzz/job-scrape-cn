@@ -2,7 +2,7 @@
 
 理解这一点是理解整个采集流水线的起点：`jp run` 的产出行数与执行时长，几乎完全由这份文件决定。
 
-Sources: [config.py](src/jobscrape/config.py#L88-L94), [searches.example.yaml](src/jobscrape/searches.example.yaml#L1-L17)
+Sources: [config.py](../../../../src/jobscrape/config.py#L88-L94), [searches.example.yaml](../../../../src/jobscrape/searches.example.yaml#L1-L17)
 
 ## 配置文件的位置与生成
 
@@ -19,7 +19,7 @@ flowchart LR
 
 `jp init` 命令会调用 `config.init_searches()`，把包内的 `searches.example.yaml` 复制到运行时目录。**这是一个「存在即跳过」的幂等操作**：如果 `searches.yaml` 已经存在且未加 `--force`，复制会被跳过，你手动编辑过的内容不会被覆盖；只有显式传入 `--force` 才会重新用模板覆盖。这意味着「编辑搜索任务」和「初始化运行时」是两件分开的事——先 `jp init`，再改文件。
 
-Sources: [config.py](src/jobscrape/config.py#L34-L39), [config.py](src/jobscrape/config.py#L58-L59), [config.py](src/jobscrape/config.py#L72-L78), [cli.py](src/jobscrape/cli.py#L26-L38)
+Sources: [config.py](../../../../src/jobscrape/config.py#L34-L39), [config.py](../../../../src/jobscrape/config.py#L58-L59), [config.py](../../../../src/jobscrape/config.py#L72-L78), [cli.py](../../../../src/jobscrape/cli.py#L26-L38)
 
 ## 文件结构：按平台分节
 
@@ -37,7 +37,7 @@ Sources: [config.py](src/jobscrape/config.py#L34-L39), [config.py](src/jobscrape
 | `experience` | boss | 否 | 服务端年限筛选，仅 Boss 生效（猎聘配了只打印提示） |
 | `education` | 两平台 | 否 | 服务端学历筛选，两平台可用档位不同 |
 
-Sources: [config.py](src/jobscrape/config.py#L88-L94), [searches.example.yaml](src/jobscrape/searches.example.yaml#L4-L30)
+Sources: [config.py](../../../../src/jobscrape/config.py#L88-L94), [searches.example.yaml](../../../../src/jobscrape/searches.example.yaml#L4-L30)
 
 ## 关键词如何展开成采集任务
 
@@ -60,7 +60,7 @@ flowchart TD
 
 一个关键细节：**`conf` 整节会被原样传给 `discoverer.run()`**，关键词是通过独立参数 `kw` 传入的。因此 `cities`、`city_codes`、`education` 等字段对同一个平台下的每个关键词都相同——它们不随关键词变化，只有 `kw` 在变。
 
-Sources: [pipeline.py](src/jobscrape/pipeline.py#L27-L43), [pipeline.py](src/jobscrape/pipeline.py#L46-L70)
+Sources: [pipeline.py](../../../../src/jobscrape/pipeline.py#L27-L43), [pipeline.py](../../../../src/jobscrape/pipeline.py#L46-L70)
 
 ## 城市：中文名到平台代码的映射
 
@@ -88,7 +88,7 @@ code = conf.get("city_codes", {}).get(city) or CITY_CODES.get(city, <默认值>)
 | 西安 | `101110100` | `270020` |
 | 合肥 | `101220100` | `150020` |
 
-Sources: [boss.py](src/jobscrape/discovery/boss.py#L18-L24), [liepin.py](src/jobscrape/discovery/liepin.py#L17-L23), [boss.py](src/jobscrape/discovery/boss.py#L86-L88), [liepin.py](src/jobscrape/discovery/liepin.py#L41-L49)
+Sources: [boss.py](../../../../src/jobscrape/discovery/boss.py#L18-L24), [liepin.py](../../../../src/jobscrape/discovery/liepin.py#L17-L23), [boss.py](../../../../src/jobscrape/discovery/boss.py#L86-L88), [liepin.py](../../../../src/jobscrape/discovery/liepin.py#L41-L49)
 
 ## 城市在两个平台的差异处理
 
@@ -112,7 +112,7 @@ flowchart TD
 
 即便如此，猎聘 `dq` 过滤后仍会混入约 **5% 的外地推荐卡**，所以 `run()` 里还有一层**客户端城市兜底**：用 `cities` 构建 `allowed` 集合，卡片映射时若其城市不在集合内则丢弃。城市名比对前会经过 `_norm_city` 归一化（`「上海-浦东新区」→「上海」`、`「北京市」→「北京」`）。特别注意：**当 `dq` 为空、无法判定城市时，卡片会被保留而非误杀**。
 
-Sources: [liepin.py](src/jobscrape/discovery/liepin.py#L41-L57), [liepin.py](src/jobscrape/discovery/liepin.py#L59-L84), [liepin.py](src/jobscrape/discovery/liepin.py#L140-L189), [liepin.py](src/jobscrape/discovery/liepin.py#L192-L195), [test_liepin_city.py](tests/test_liepin_city.py#L29-L59)
+Sources: [liepin.py](../../../../src/jobscrape/discovery/liepin.py#L41-L57), [liepin.py](../../../../src/jobscrape/discovery/liepin.py#L59-L84), [liepin.py](../../../../src/jobscrape/discovery/liepin.py#L140-L189), [liepin.py](../../../../src/jobscrape/discovery/liepin.py#L192-L195), [test_liepin_city.py](../../../../tests/test_liepin_city.py#L29-L59)
 
 ## 多城市配额：每个城市都有产出
 
@@ -124,7 +124,7 @@ per_city = limit if len(cities) <= 1 else max(4, limit // len(cities))
 
 也就是说，`--max` 给出的上限会被**城市数平分**（至少保证 4 条），而不是每个城市各抓满 `--max`。这里有一处刻意的设计：**曾经的逻辑是「攒够 `limit*2` 就停」，结果排在前面的城市会吃光配额，后面的城市被整体跳过**；改为平分配额后，五城场景下每城都保证有产出。因此当你把 `cities` 从 3 个扩到 5 个时，单城实际抓取量会下降，若希望总量不变应同步调大 `--max`。
 
-Sources: [boss.py](src/jobscrape/discovery/boss.py#L107-L116), [liepin.py](src/jobscrape/discovery/liepin.py#L59-L70)
+Sources: [boss.py](../../../../src/jobscrape/discovery/boss.py#L107-L116), [liepin.py](../../../../src/jobscrape/discovery/liepin.py#L59-L70)
 
 ## 平台特有参数：翻页与筛选
 
@@ -138,7 +138,7 @@ Sources: [boss.py](src/jobscrape/discovery/boss.py#L107-L116), [liepin.py](src/j
 
 **`education`（两平台）**是学历服务端筛选，拼成 Boss 的 `&degree=` 或猎聘的 `&eduLevel=`。两平台**档位集合不同**，取值非法同样直接报错。
 
-Sources: [liepin.py](src/jobscrape/discovery/liepin.py#L113-L127), [boss.py](src/jobscrape/discovery/boss.py#L89-L105), [liepin.py](src/jobscrape/discovery/liepin.py#L50-L57), [searches.example.yaml](src/jobscrape/searches.example.yaml#L8-L17)
+Sources: [liepin.py](../../../../src/jobscrape/discovery/liepin.py#L113-L127), [boss.py](../../../../src/jobscrape/discovery/boss.py#L89-L105), [liepin.py](../../../../src/jobscrape/discovery/liepin.py#L50-L57), [searches.example.yaml](../../../../src/jobscrape/searches.example.yaml#L8-L17)
 
 ## 从配置到数据：关键词沉淀为 search_source
 
@@ -150,7 +150,7 @@ job = {**j, "platform": self.platform, "search_source": keyword}
 
 因此导出的每一行都能追溯它由哪个关键词搜得，便于后续按关键词维度统计产出与质量。这也解释了为什么 `conf` 整节原样下传而 `kw` 独立传参——关键词需要被记住，而城市等参数只用于构造请求。
 
-Sources: [base.py](src/jobscrape/discovery/base.py#L165-L181), [db.py](src/jobscrape/db.py#L57-L57), [export.py](src/jobscrape/export.py#L21-L21)
+Sources: [base.py](../../../../src/jobscrape/discovery/base.py#L165-L181), [db.py](../../../../src/jobscrape/db.py#L57-L57), [export.py](../../../../src/jobscrape/export.py#L21-L21)
 
 ## 小结与下一步
 
