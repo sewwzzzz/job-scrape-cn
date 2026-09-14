@@ -176,6 +176,7 @@ class BrowserSession:
             except Exception:
                 ss = {}
             if ss:
+                #deprecated liepin不使用session了，Page可以从Context自动继承登陆状态
                 self.context.add_init_script(
                     "(() => { const MAP = " + json.dumps(ss) + ";"
                     " const kv = MAP[location.host] || MAP[location.origin];"
